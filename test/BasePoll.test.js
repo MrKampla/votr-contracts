@@ -8,9 +8,9 @@ contract('BasePoll', async (accounts) => {
     pollContract = await BasePoll.new(...prepeareParamsBasePoll(accounts.slice(0, 2)));
   });
 
-  it('Initializes with correct amount of options', async () => {
-    const optionsCount = (await pollContract.amountOfChoices()).toNumber();
-    assert.equal(optionsCount, 2);
+  it('Initializes with correct amount of choices', async () => {
+    const choicesCount = (await pollContract.amountOfChoices()).toNumber();
+    assert.equal(choicesCount, 2);
   });
 
   it('Initializes with correct choices', async () => {

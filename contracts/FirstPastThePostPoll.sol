@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 pragma solidity >=0.4.22 <0.8.0;
 
 import './BasePoll.sol';
@@ -30,10 +31,10 @@ contract FirstPastThePostPoll is BasePoll {
   }
 
   function prepeareAllowedVotes(address[] memory _voters) internal pure returns (uint256[] memory) {
-    uint256[] memory _votePowers = new uint256[](_voters.length);
+    uint256[] memory amountOfAllowedVotes = new uint256[](_voters.length);
     for (uint256 i = 0; i < _voters.length; i++) {
-      _votePowers[i] = 1;
+      amountOfAllowedVotes[i] = 1;
     }
-    return _votePowers;
+    return amountOfAllowedVotes;
   }
 }
