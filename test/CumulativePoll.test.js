@@ -4,7 +4,7 @@ let { prepeareParamsCumulativePoll } = require('./defaultPollparams');
 contract('CumulativePoll', async (accounts) => {
   let pollContract;
   beforeEach(async () => {
-    pollContract = await CumulativePoll.new(...prepeareParamsCumulativePoll(accounts.slice(0, 2)));
+    pollContract = await CumulativePoll.new(...prepeareParamsCumulativePoll());
   });
 
   it('Single multivote works', async () => {

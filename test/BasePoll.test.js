@@ -78,4 +78,11 @@ contract('BasePoll', async (accounts) => {
       'The recipient is not allowed to vote.'
     );
   });
+
+  it('End date cannot be in past', async () => {
+    const dateInPast = +new Date('01-02-2000') / 1000;
+    let paramsArr = prepeareParamsBasePoll(accounts.slice(0, 2)).splice(-2);
+    paramsArr = paramsArr.concat([dateInPast, true]);
+    expectRevert(BasePoll.new(...paramsArr), 'The end date cannot be in past.');
+  });
 });

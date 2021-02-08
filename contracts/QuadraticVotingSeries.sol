@@ -10,16 +10,18 @@ contract QuadraticVotingSeries {
   address[] public voters;
   mapping(address => uint256) public allowedVotesThroughoutSeries;
   mapping(address => bool) public votersWhitelist;
+  bool public isClosed;
 
   constructor(
     address _owner,
     address[] memory _voters,
     uint256[] memory _allowedVotes,
     bool _delegationAllowed
-  ) {
+  ) public {
     owner = _owner;
     _delegationAllowed = delegationAllowed;
     voters = _voters;
+    isClosed = false;
 
     for (uint256 i = 0; i < _voters.length; i++) {
       allowedVotesThroughoutSeries[_voters[i]] = _allowedVotes[i];
@@ -27,13 +29,14 @@ contract QuadraticVotingSeries {
     }
   }
 
-  function createNextPoll(
+  function addPoll(
     string memory title,
     string memory description,
     bytes32[] memory _choices,
     uint256 _quorum,
     uint256 _endDate
   ) public {
+    require(!isClosed, 'The series has been ended.');
     require(_endDate != 0, 'Quadratic Polls must have specified end time.');
 
     //check if there are previous polls, if so then get allowedVotes from it and check used votes to calculate remaining ones
@@ -64,6 +67,12 @@ contract QuadraticVotingSeries {
 
   function getNumberOfPollsInTheSeries() public view returns (uint256 amount) {
     return polls.length;
+  }
+
+  function closeSeries() public returns (bool) {
+    require(msg.sender == owner, 'Only owner can close the series.');
+    isClosed = true;
+    return true;
   }
 
   function prepeareAllowedVotes() internal view returns (uint256[] memory) {

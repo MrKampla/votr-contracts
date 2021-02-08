@@ -33,29 +33,16 @@ contract QuadraticPoll is BasePoll {
     )
   {
     require(choice < choices.length, 'There is no such candidate with this index.');
-    require(amountOfVotes**2 <= int256(allowedVotes[msg.sender]), 'The voter has insufficient votes.');
+    require(amountOfVotes**2 <= int256(allowedVotes[msg.sender]), 'Insufficient voting power.');
     require(amountOfVotes > 0, 'You cannot give negative number of votes in this type of poll.');
 
     allowedVotes[msg.sender] -= uint256(amountOfVotes**2);
+    hasVoted[msg.sender] = true;
     Choice storage selectedOption = choices[choice];
     selectedOption.voteCount += amountOfVotes;
     emit Voted(msg.sender, choice, amountOfVotes);
 
     return (msg.sender, choice, selectedOption.voteCount);
-  }
-
-  function isFinished() public view virtual override returns (bool finished, bool quorumReached) {
-    uint256 receivedVotes = 0;
-
-    //count reveived amount of votes by all choices
-    for (uint256 i = 0; i < choices.length; i++) {
-      receivedVotes += uint256(choices[i].voteCount);
-    }
-    if (receivedVotes != 0 && receivedVotes**2 == sumOfAllAllowedVotes) return (true, true);
-    if (endDate == 0) {
-      return (true, receivedVotes >= quorum);
-    }
-    return (block.timestamp >= endDate, receivedVotes >= quorum);
   }
 
   function delegateVote(address to, uint256 amount) public virtual override onlyOngoing returns (bool) {

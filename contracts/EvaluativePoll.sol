@@ -6,7 +6,6 @@ import './BasePoll.sol';
 contract EvaluativePoll is BasePoll {
   //address to choice to rating which user gave for certain choice
   mapping(address => mapping(uint256 => int256)) hasVotedFor;
-  mapping(address => bool) hasVoted;
 
   constructor(
     address _chairman,
@@ -68,19 +67,5 @@ contract EvaluativePoll is BasePoll {
     }
 
     return true;
-  }
-
-  function isFinished() public view override returns (bool finished, bool quorumReached) {
-    uint256 pastVoters = 0;
-
-    //count reveived amount of votes by all choices
-    for (uint256 i = 0; i < voters.length; i++) {
-      pastVoters += hasVoted[voters[i]] ? 1 : 0;
-    }
-    if (pastVoters != 0 && pastVoters == voters.length) return (true, true);
-    if (endDate == 0) {
-      return (true, voters.length >= quorum);
-    }
-    return (block.timestamp >= endDate, voters.length >= quorum);
   }
 }

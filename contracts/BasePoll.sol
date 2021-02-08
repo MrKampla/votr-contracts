@@ -29,7 +29,7 @@ contract BasePoll is IPoll {
   uint256 public endDate;
   bool public allowVoteDelegation;
   string public pollType;
-  uint256 public sumOfAllAllowedVotes;
+  mapping(address => bool) public hasVoted;
 
   struct Choice {
     string name;
@@ -61,6 +61,7 @@ contract BasePoll is IPoll {
     uint256 _endDate,
     bool _allowVoteDelegation
   ) public {
+    require(_endDate > block.timestamp, 'The end date cannot be in past.');
     title = _title;
     description = _description;
     voters = _voters;
@@ -73,10 +74,6 @@ contract BasePoll is IPoll {
     for (uint256 i = 0; i < _choices.length; i++) {
       bytes32 name = _choices[i];
       choices.push(Choice({ name: StringHelper.bytes32ToString(abi.encodePacked(name)), voteCount: 0 }));
-    }
-
-    for (uint256 i = 0; i < _allowedVotes.length; i++) {
-      sumOfAllAllowedVotes += _allowedVotes[i];
     }
 
     // initialize voters
@@ -102,6 +99,7 @@ contract BasePoll is IPoll {
     require(amountOfVotes > 0, 'You cannot give negative number of votes in this type of poll.');
 
     allowedVotes[msg.sender] -= uint256(amountOfVotes);
+    hasVoted[msg.sender] = true;
     Choice storage selectedOption = choices[choice];
     selectedOption.voteCount += amountOfVotes;
     emit Voted(msg.sender, choice, amountOfVotes);
@@ -120,17 +118,17 @@ contract BasePoll is IPoll {
   }
 
   function isFinished() public view virtual override returns (bool finished, bool quorumReached) {
-    uint256 receivedVotes = 0;
+    uint256 pastVoters = 0;
 
-    //count reveived amount of votes by all choices
-    for (uint256 i = 0; i < choices.length; i++) {
-      receivedVotes += uint256(choices[i].voteCount);
+    for (uint256 i = 0; i < voters.length; i++) {
+      pastVoters += hasVoted[voters[i]] ? 1 : 0;
     }
-    if (receivedVotes != 0 && receivedVotes == sumOfAllAllowedVotes) return (true, true);
+
+    if (pastVoters != 0 && pastVoters == voters.length) return (true, true);
     if (endDate == 0) {
-      return (true, receivedVotes >= quorum);
+      return (true, pastVoters >= quorum);
     }
-    return (block.timestamp >= endDate, receivedVotes >= quorum);
+    return (block.timestamp >= endDate, pastVoters >= quorum);
   }
 
   function delegateVote(address to, uint256 amount) public virtual override onlyOngoing returns (bool) {
