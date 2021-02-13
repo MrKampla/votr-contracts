@@ -38,14 +38,13 @@ contract QuadraticPoll is BasePoll {
 
     allowedVotes[msg.sender] -= uint256(amountOfVotes**2);
     hasVoted[msg.sender] = true;
-    Choice storage selectedOption = choices[choice];
-    selectedOption.voteCount += amountOfVotes;
+    choices[choice].voteCount += amountOfVotes;
     emit Voted(msg.sender, choice, amountOfVotes);
 
-    return (msg.sender, choice, selectedOption.voteCount);
+    return (msg.sender, choice, choices[choice].voteCount);
   }
 
-  function delegateVote(address to, uint256 amount) public virtual override onlyOngoing returns (bool) {
+  function delegateVote(address to, uint256 amount) external virtual override onlyOngoing returns (bool) {
     require(allowVoteDelegation, 'Vote delegation is disabled for this poll.');
     require(votersWhitelist[msg.sender], 'The voter is not allowed to vote.');
     require(allowedVotes[msg.sender] >= amount**2, 'The voter has insufficient votes.');

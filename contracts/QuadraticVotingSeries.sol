@@ -4,7 +4,7 @@ pragma solidity >=0.4.22 <0.8.0;
 import './QuadraticPoll.sol';
 
 contract QuadraticVotingSeries {
-  QuadraticPoll[] public polls; //maybe it need initializing in constructor
+  QuadraticPoll[] public polls;
   address public owner;
   bool public delegationAllowed;
   address[] public voters;
@@ -41,10 +41,10 @@ contract QuadraticVotingSeries {
 
     //check if there are previous polls, if so then get allowedVotes from it and check used votes to calculate remaining ones
     if (polls.length != 0) {
-      QuadraticPoll lastPoll = polls[polls.length - 1];
+      QuadraticPoll lastPoll = QuadraticPoll(polls[polls.length - 1]);
       //check if previous poll has ended, if not then revert
       (bool isFinished, ) = lastPoll.isFinished();
-      require(!isFinished, 'Last poll in the series has not yet ended, cannot add new one.');
+      require(isFinished, 'Last poll in the series has not yet ended, cannot add new one.');
       for (uint256 i = 0; i < voters.length; i++) {
         allowedVotesThroughoutSeries[voters[i]] -= lastPoll.allowedVotes(voters[i]);
       }
@@ -69,7 +69,7 @@ contract QuadraticVotingSeries {
     return polls.length;
   }
 
-  function closeSeries() public returns (bool) {
+  function closeSeries() external returns (bool) {
     require(msg.sender == owner, 'Only owner can close the series.');
     isClosed = true;
     return true;

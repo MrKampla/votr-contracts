@@ -24,7 +24,7 @@ contract('QuadraticPoll', async (accounts) => {
   });
 
   it(`Should fail when insufficient voting power`, async () => {
-    expectRevert(pollContract.vote(1, 1500, { from: accounts[0] }), 'Insufficient voting power.');
+    await expectRevert(pollContract.vote(1, 1500, { from: accounts[0] }), 'Insufficient voting power.');
   });
 
   it('Vote delegation works', async () => {

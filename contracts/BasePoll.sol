@@ -2,24 +2,7 @@
 pragma solidity >=0.4.22 <0.8.0;
 
 import './StringHelper.sol';
-
-interface IPoll {
-  event Voted(address indexed who, uint256 indexed chosen, int256 votesAmount);
-
-  function vote(uint256 choice, int256 amountOfVotes)
-    external
-    returns (
-      address voter,
-      uint256 choiceIndex,
-      int256 voteCount
-    );
-
-  function checkWinner() external view returns (uint256 winnerIndex);
-
-  function isFinished() external view returns (bool finished, bool quorumReached);
-
-  function delegateVote(address to, uint256 amount) external returns (bool);
-}
+import './IPoll.sol';
 
 contract BasePoll is IPoll {
   string public title;
@@ -84,7 +67,7 @@ contract BasePoll is IPoll {
   }
 
   function vote(uint256 choice, int256 amountOfVotes)
-    public
+    external
     virtual
     override
     onlyOngoing
@@ -100,14 +83,13 @@ contract BasePoll is IPoll {
 
     allowedVotes[msg.sender] -= uint256(amountOfVotes);
     hasVoted[msg.sender] = true;
-    Choice storage selectedOption = choices[choice];
-    selectedOption.voteCount += amountOfVotes;
+    choices[choice].voteCount += amountOfVotes;
     emit Voted(msg.sender, choice, amountOfVotes);
 
-    return (msg.sender, choice, selectedOption.voteCount);
+    return (msg.sender, choice, choices[choice].voteCount);
   }
 
-  function checkWinner() public view virtual override returns (uint256 winnerIndex) {
+  function checkWinner() external view virtual override returns (uint256 winnerIndex) {
     uint256 winningChoice = 0;
     for (uint256 i = 0; i < choices.length; i++) {
       if (choices[i].voteCount > int256(winningChoice)) {
@@ -131,7 +113,7 @@ contract BasePoll is IPoll {
     return (block.timestamp >= endDate, pastVoters >= quorum);
   }
 
-  function delegateVote(address to, uint256 amount) public virtual override onlyOngoing returns (bool) {
+  function delegateVote(address to, uint256 amount) external virtual override onlyOngoing returns (bool) {
     require(allowVoteDelegation, 'Vote delegation is disabled for this poll.');
     require(votersWhitelist[msg.sender], 'The voter is not allowed to vote.');
     require(allowedVotes[msg.sender] >= amount, 'The voter has insufficient votes.');

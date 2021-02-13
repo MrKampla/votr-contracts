@@ -5,6 +5,7 @@ const CumulativePoll = artifacts.require('./CumulativePoll.sol');
 const EvaluativePoll = artifacts.require('./EvaluativePoll.sol');
 const QuadraticPoll = artifacts.require('./QuadraticPoll.sol');
 const QuadraticVotingSeries = artifacts.require('./QuadraticVotingSeries.sol');
+const VotrPollFactory = artifacts.require('./VotrPollFactory.sol');
 
 const {
   prepeareParamsBasePoll,
@@ -24,6 +25,7 @@ module.exports = function (deployer) {
     EvaluativePoll,
     QuadraticPoll,
     QuadraticVotingSeries,
+    // VotrPollFactory,
   ]);
 
   deployer.deploy(BasePoll, ...prepeareParamsBasePoll());
@@ -32,4 +34,5 @@ module.exports = function (deployer) {
   deployer.deploy(EvaluativePoll, ...prepeareParamsEvaluativePoll());
   deployer.deploy(QuadraticPoll, ...prepeareParamsQuadraticPoll());
   deployer.deploy(QuadraticVotingSeries, ...prepeareParamsQuadraticSeries());
+  // deployer.deploy(VotrPollFactory);
 };

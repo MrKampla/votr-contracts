@@ -48,11 +48,10 @@ contract EvaluativePoll is BasePoll {
 
     hasVotedFor[msg.sender][choice] = amountOfVotes;
     hasVoted[msg.sender] = true;
-    Choice storage selectedOption = choices[choice];
-    selectedOption.voteCount += amountOfVotes;
+    choices[choice].voteCount += amountOfVotes;
     emit Voted(msg.sender, choice, amountOfVotes);
 
-    return (msg.sender, choice, selectedOption.voteCount);
+    return (msg.sender, choice, choices[choice].voteCount);
   }
 
   function batchVotes(uint256[] memory choices, int256[] memory amountOfVotesPerChoice)
@@ -63,7 +62,7 @@ contract EvaluativePoll is BasePoll {
     require(choices.length == amountOfVotesPerChoice.length, 'Number of choices and votes provided do not match.');
 
     for (uint256 i = 0; i < choices.length; i++) {
-      this.vote(choices[i], amountOfVotesPerChoice[i]);
+      vote(choices[i], amountOfVotesPerChoice[i]);
     }
 
     return true;

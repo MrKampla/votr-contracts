@@ -21,7 +21,10 @@ contract('EvaluativePoll', async (accounts) => {
   });
 
   it('Only accepts disapproval or approval votes', async () => {
-    expectRevert(pollContract.vote(1, 2, { from: accounts[0] }), 'Incorrect vote type, only -1, 0 or +1 are allowed.');
+    await expectRevert(
+      pollContract.vote(1, 2, { from: accounts[0] }),
+      'Incorrect vote type, only -1, 0 or +1 are allowed.'
+    );
   });
 
   it('One approval and one disapproval balance each other to 0', async () => {
@@ -49,7 +52,7 @@ contract('EvaluativePoll', async (accounts) => {
   });
 
   it('Vote delegation is disabled', async () => {
-    expectRevert(
+    await expectRevert(
       pollContract.delegateVote(accounts[3], 1, { from: accounts[0] }),
       'Vote delegation is disabled for this poll.'
     );

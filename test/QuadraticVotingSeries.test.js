@@ -22,16 +22,23 @@ contract('QuadraticVotingSeries', async (accounts) => {
   it(`Fails to add new poll to series if previous one hasn't finished`, async () => {
     await seriesContract.addPoll(...prepeareParamsAddNewPollToQuadraticSeries());
     assert.equal((await seriesContract.getNumberOfPollsInTheSeries()).toNumber(), 1);
-
-    expectRevert(
+    const pollContractAddresss = await seriesContract.polls(0);
+    const pollInstance = await QuadraticPoll.at(pollContractAddresss);
+    const { finished } = await pollInstance.isFinished();
+    assert.equal(finished, false);
+    await expectRevert(
       seriesContract.addPoll(...prepeareParamsAddNewPollToQuadraticSeries()),
       'Last poll in the series has not yet ended, cannot add new one.'
     );
   });
+
   it(`Successfully closes`, async () => {
     await seriesContract.addPoll(...prepeareParamsAddNewPollToQuadraticSeries());
-    // await seriesContract.closeSeries();
-    // console.log((await seriesContract.getNumberOfPollsInTheSeries()).toNumber());
-    expectRevert(seriesContract.addPoll(...prepeareParamsAddNewPollToQuadraticSeries()), 'The series has been ended.');
+    await seriesContract.closeSeries();
+
+    await expectRevert(
+      seriesContract.addPoll(...prepeareParamsAddNewPollToQuadraticSeries()),
+      'The series has been ended.'
+    );
   });
 });

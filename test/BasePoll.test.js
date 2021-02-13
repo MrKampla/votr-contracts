@@ -73,7 +73,7 @@ contract('BasePoll', async (accounts) => {
   });
 
   it('Can only delegate votes to whitelisted user', async () => {
-    expectRevert(
+    await expectRevert(
       pollContract.delegateVote(accounts[3], 1, { from: accounts[0] }),
       'The recipient is not allowed to vote.'
     );
@@ -81,8 +81,9 @@ contract('BasePoll', async (accounts) => {
 
   it('End date cannot be in past', async () => {
     const dateInPast = +new Date('01-02-2000') / 1000;
-    let paramsArr = prepeareParamsBasePoll(accounts.slice(0, 2)).splice(-2);
+    let paramsArr = prepeareParamsBasePoll(accounts.slice(0, 2));
+    paramsArr.splice(-2, 2);
     paramsArr = paramsArr.concat([dateInPast, true]);
-    expectRevert(BasePoll.new(...paramsArr), 'The end date cannot be in past.');
+    await expectRevert(BasePoll.new(...paramsArr), 'The end date cannot be in past.');
   });
 });
