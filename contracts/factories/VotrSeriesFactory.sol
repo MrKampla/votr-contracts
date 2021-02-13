@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.4.22 <0.8.0;
 
-import './QuadraticVotingSeries.sol';
+import '../polls/QuadraticVotingSeries.sol';
 
 contract VotrSeriesFactory {
   uint256 public numberOfSeries;

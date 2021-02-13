@@ -99,6 +99,22 @@ function prepeareParamsAddNewPollToQuadraticSeries() {
   ];
 }
 
+function prepeareParamsToFPTPPollFromFactory(defaultAccounts = accounts) {
+  return [
+    'Presidential elections',
+    'This is a test poll',
+    [
+      '0x426964656e000000000000000000000000000000000000000000000000000000', //Biden
+      '0x5472756d70000000000000000000000000000000000000000000000000000000', //Trump
+    ],
+    defaultAccounts,
+    [],
+    2,
+    new Date().getTime() + 60 * 2 * 1000, // 2 minutes from now
+    true,
+  ];
+}
+
 module.exports = {
   prepeareParamsBasePoll,
   prepeareParamsFPTPPoll,
@@ -107,4 +123,5 @@ module.exports = {
   prepeareParamsQuadraticPoll,
   prepeareParamsQuadraticSeries,
   prepeareParamsAddNewPollToQuadraticSeries,
+  prepeareParamsToFPTPPollFromFactory,
 };

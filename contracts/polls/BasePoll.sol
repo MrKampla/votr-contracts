@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.4.22 <0.8.0;
 
-import './StringHelper.sol';
-import './IPoll.sol';
+import '../interfaces/IPoll.sol';
 
 contract BasePoll is IPoll {
   string public title;
@@ -15,7 +14,7 @@ contract BasePoll is IPoll {
   mapping(address => bool) public hasVoted;
 
   struct Choice {
-    string name;
+    bytes32 name;
     int256 voteCount;
   }
   Choice[] public choices;
@@ -56,7 +55,7 @@ contract BasePoll is IPoll {
     // initialize choices
     for (uint256 i = 0; i < _choices.length; i++) {
       bytes32 name = _choices[i];
-      choices.push(Choice({ name: StringHelper.bytes32ToString(abi.encodePacked(name)), voteCount: 0 }));
+      choices.push(Choice({ name: name, voteCount: 0 }));
     }
 
     // initialize voters

@@ -1,6 +1,7 @@
 let BasePoll = artifacts.require('./BasePoll.sol');
 let { prepeareParamsBasePoll } = require('./defaultPollparams');
 const { expectEvent, expectRevert } = require('@openzeppelin/test-helpers');
+const Web3 = require('web3');
 
 contract('BasePoll', async (accounts) => {
   let pollContract;
@@ -16,9 +17,9 @@ contract('BasePoll', async (accounts) => {
   it('Initializes with correct choices', async () => {
     const firstOption = await pollContract.choices(0);
     const secondOption = await pollContract.choices(1);
-    assert.equal(firstOption.name, 'Biden');
+    assert.equal(Web3.utils.toUtf8(firstOption.name), 'Biden');
     assert.equal(await firstOption.voteCount.toNumber(), 0);
-    assert.equal(secondOption.name, 'Trump');
+    assert.equal(Web3.utils.toUtf8(secondOption.name), 'Trump');
     assert.equal(await secondOption.voteCount.toNumber(), 0);
   });
 

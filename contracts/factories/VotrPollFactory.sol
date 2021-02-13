@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.4.22 <0.8.0;
 
-import './FirstPastThePostPoll.sol';
-import './CumulativePoll.sol';
-import './EvaluativePoll.sol';
+import '../polls/FirstPastThePostPoll.sol';
+import '../polls/CumulativePoll.sol';
+import '../polls/EvaluativePoll.sol';
 
 contract VotrPollFactory {
   uint256 public numberOfPolls;
