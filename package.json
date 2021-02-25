@@ -7,7 +7,7 @@
   },
   "scripts": {
     "test": "truffle test",
-    "ganache": "ganache-cli -m \"problem used theory volcano daring enough much spray sail steak finish loop\""
+    "ganache": "ganache-cli -m \"problem used theory volcano daring enough much spray sail steak finish loop\" --networkId 4447"
   },
   "author": "Kamil Planer <mrkampla@gmail.com>",
   "license": "MIT",
