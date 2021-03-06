@@ -2,7 +2,7 @@ let EvaluativePoll = artifacts.require('./EvaluativePoll.sol');
 let { prepeareParamsEvaluativePoll } = require('./defaultPollparams');
 const { expectRevert } = require('@openzeppelin/test-helpers');
 
-contract('EvaluativePoll', async (accounts) => {
+contract('EvaluativePoll', async accounts => {
   let pollContract;
   beforeEach(async () => {
     pollContract = await EvaluativePoll.new(...prepeareParamsEvaluativePoll(accounts.slice(0, 2)));
@@ -21,10 +21,7 @@ contract('EvaluativePoll', async (accounts) => {
   });
 
   it('Only accepts disapproval or approval votes', async () => {
-    await expectRevert(
-      pollContract.vote(1, 2, { from: accounts[0] }),
-      'Incorrect vote type, only -1, 0 or +1 are allowed.'
-    );
+    await expectRevert(pollContract.vote(1, 2, { from: accounts[0] }), 'Only -1,0,+1 votes are allowed');
   });
 
   it('One approval and one disapproval balance each other to 0', async () => {
@@ -52,9 +49,6 @@ contract('EvaluativePoll', async (accounts) => {
   });
 
   it('Vote delegation is disabled', async () => {
-    await expectRevert(
-      pollContract.delegateVote(accounts[3], 1, { from: accounts[0] }),
-      'Vote delegation is disabled for this poll.'
-    );
+    await expectRevert(pollContract.delegateVote(accounts[3], 1, { from: accounts[0] }), 'Vote delegation is disabled');
   });
 });

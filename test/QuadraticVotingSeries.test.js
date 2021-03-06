@@ -3,7 +3,7 @@ let QuadraticPoll = artifacts.require('./QuadraticPoll.sol');
 let { prepeareParamsQuadraticSeries, prepeareParamsAddNewPollToQuadraticSeries } = require('./defaultPollparams');
 const { expectRevert } = require('@openzeppelin/test-helpers');
 
-contract('QuadraticVotingSeries', async (accounts) => {
+contract('QuadraticVotingSeries', async accounts => {
   let seriesContract;
   beforeEach(async () => {
     seriesContract = await QuadraticVotingSeries.new(...prepeareParamsQuadraticSeries(accounts.slice(0, 2)));
@@ -28,7 +28,7 @@ contract('QuadraticVotingSeries', async (accounts) => {
     assert.equal(finished, false);
     await expectRevert(
       seriesContract.addPoll(...prepeareParamsAddNewPollToQuadraticSeries()),
-      'Last poll in the series has not yet ended, cannot add new one.'
+      'Previous poll not finished'
     );
   });
 

@@ -3,7 +3,7 @@ let { prepeareParamsBasePoll } = require('./defaultPollparams');
 const { expectEvent, expectRevert } = require('@openzeppelin/test-helpers');
 const Web3 = require('web3');
 
-contract('BasePoll', async (accounts) => {
+contract('BasePoll', async accounts => {
   let pollContract;
   beforeEach(async () => {
     pollContract = await BasePoll.new(...prepeareParamsBasePoll(accounts.slice(0, 2)));
@@ -29,7 +29,7 @@ contract('BasePoll', async (accounts) => {
   });
 
   it('Allows only whitelisted voters', async () => {
-    await expectRevert(pollContract.vote(1, 1, { from: accounts[3] }), 'The voter has insufficient votes.');
+    await expectRevert(pollContract.vote(1, 1, { from: accounts[3] }), 'Insufficient votes');
   });
 
   it('Single vote works', async () => {
@@ -76,7 +76,7 @@ contract('BasePoll', async (accounts) => {
   it('Can only delegate votes to whitelisted user', async () => {
     await expectRevert(
       pollContract.delegateVote(accounts[3], 1, { from: accounts[0] }),
-      'The recipient is not allowed to vote.'
+      'Recipient not allowed to vote'
     );
   });
 
