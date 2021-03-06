@@ -7,11 +7,14 @@
   },
   "scripts": {
     "test": "truffle test",
-    "ganache": "ganache-cli -m \"problem used theory volcano daring enough much spray sail steak finish loop\" --networkId 4447"
+    "ganache": "ganache-cli -m \"problem used theory volcano daring enough much spray sail steak finish loop\" --networkId 4447",
+    "lint": "solhint 'contracts/**/*.sol'"
   },
   "author": "Kamil Planer <mrkampla@gmail.com>",
   "license": "MIT",
-  "devDependencies": {},
+  "devDependencies": {
+    "solhint": "^3.3.3"
+  },
   "dependencies": {
     "@openzeppelin/test-helpers": "^0.5.10"
   }

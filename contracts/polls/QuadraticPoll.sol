@@ -32,9 +32,9 @@ contract QuadraticPoll is BasePoll {
       int256 voteCount
     )
   {
-    require(choice < choices.length, 'There is no such candidate with this index.');
-    require(amountOfVotes**2 <= int256(allowedVotes[msg.sender]), 'Insufficient voting power.');
-    require(amountOfVotes > 0, 'You cannot give negative number of votes in this type of poll.');
+    require(choice < choices.length, 'Candidate not found');
+    require(amountOfVotes**2 <= int256(allowedVotes[msg.sender]), 'Insufficient voting power');
+    require(amountOfVotes > 0, 'amountOfVotes smaller than 0');
 
     allowedVotes[msg.sender] -= uint256(amountOfVotes**2);
     hasVoted[msg.sender] = true;
@@ -45,10 +45,10 @@ contract QuadraticPoll is BasePoll {
   }
 
   function delegateVote(address to, uint256 amount) external virtual override onlyOngoing returns (bool) {
-    require(allowVoteDelegation, 'Vote delegation is disabled for this poll.');
-    require(votersWhitelist[msg.sender], 'The voter is not allowed to vote.');
-    require(allowedVotes[msg.sender] >= amount**2, 'The voter has insufficient votes.');
-    require(votersWhitelist[to], 'The recipient is not allowed to vote.');
+    require(allowVoteDelegation, 'Vote delegation is disabled');
+    require(votersWhitelist[msg.sender], 'Caller not allowed to vote');
+    require(allowedVotes[msg.sender] >= amount**2, 'Caller has insufficient votes');
+    require(votersWhitelist[to], 'Recipient not allowed to vote');
 
     allowedVotes[msg.sender] -= amount**2;
     allowedVotes[to] += amount**2;

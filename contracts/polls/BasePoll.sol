@@ -43,7 +43,7 @@ contract BasePoll is IPoll {
     uint256 _endDate,
     bool _allowVoteDelegation
   ) public {
-    require(_endDate > block.timestamp, 'The end date cannot be in past.');
+    require(_endDate > block.timestamp, 'The end date cannot be in past');
     title = _title;
     description = _description;
     voters = _voters;
@@ -76,9 +76,9 @@ contract BasePoll is IPoll {
       int256 voteCount
     )
   {
-    require(choice < choices.length, 'There is no such candidate with this index.');
-    require(amountOfVotes <= int256(allowedVotes[msg.sender]), 'The voter has insufficient votes.');
-    require(amountOfVotes > 0, 'You cannot give negative number of votes in this type of poll.');
+    require(choice < choices.length, 'Candidate not found');
+    require(amountOfVotes <= int256(allowedVotes[msg.sender]), 'Insufficient votes');
+    require(amountOfVotes > 0, 'amountOfVotes smaller than 0');
 
     allowedVotes[msg.sender] -= uint256(amountOfVotes);
     hasVoted[msg.sender] = true;
@@ -113,10 +113,10 @@ contract BasePoll is IPoll {
   }
 
   function delegateVote(address to, uint256 amount) external virtual override onlyOngoing returns (bool) {
-    require(allowVoteDelegation, 'Vote delegation is disabled for this poll.');
-    require(votersWhitelist[msg.sender], 'The voter is not allowed to vote.');
-    require(allowedVotes[msg.sender] >= amount, 'The voter has insufficient votes.');
-    require(votersWhitelist[to], 'The recipient is not allowed to vote.');
+    require(allowVoteDelegation, 'Vote delegation is disabled');
+    require(votersWhitelist[msg.sender], 'Caller not allowed to vote');
+    require(allowedVotes[msg.sender] >= amount, 'Caller has insufficient votes');
+    require(votersWhitelist[to], 'Recipient not allowed to vote');
 
     allowedVotes[msg.sender] -= amount;
     allowedVotes[to] += amount;
@@ -126,7 +126,7 @@ contract BasePoll is IPoll {
 
   modifier onlyOngoing() {
     (bool finished, ) = isFinished();
-    require(!finished, 'The poll has already ended.');
+    require(!finished, 'Poll has already ended');
     _;
   }
 }

@@ -5,7 +5,7 @@ import './BasePoll.sol';
 
 contract EvaluativePoll is BasePoll {
   //address to choice to rating which user gave for certain choice
-  mapping(address => mapping(uint256 => int256)) hasVotedFor;
+  mapping(address => mapping(uint256 => int256)) public hasVotedFor;
 
   constructor(
     address _chairman,
@@ -42,9 +42,9 @@ contract EvaluativePoll is BasePoll {
       int256 voteCount
     )
   {
-    require(choice < choices.length, 'There is no such candidate with this index.');
-    require(amountOfVotes < 2 && amountOfVotes > -2, 'Incorrect vote type, only -1, 0 or +1 are allowed.');
-    require(hasVotedFor[msg.sender][choice] == 0, 'The voter has already given vote for this choice.');
+    require(choice < choices.length, 'Candidate not found');
+    require(amountOfVotes < 2 && amountOfVotes > -2, 'Only -1,0,+1 votes are allowed');
+    require(hasVotedFor[msg.sender][choice] == 0, 'Caller already voted this choice');
 
     hasVotedFor[msg.sender][choice] = amountOfVotes;
     hasVoted[msg.sender] = true;
@@ -59,7 +59,7 @@ contract EvaluativePoll is BasePoll {
     onlyOngoing
     returns (bool)
   {
-    require(choices.length == amountOfVotesPerChoice.length, 'Number of choices and votes provided do not match.');
+    require(choices.length == amountOfVotesPerChoice.length, 'unmatching choices and votes');
 
     for (uint256 i = 0; i < choices.length; i++) {
       vote(choices[i], amountOfVotesPerChoice[i]);

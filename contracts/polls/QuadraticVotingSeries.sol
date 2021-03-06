@@ -36,15 +36,15 @@ contract QuadraticVotingSeries {
     uint256 _quorum,
     uint256 _endDate
   ) public {
-    require(!isClosed, 'The series has been ended.');
-    require(_endDate != 0, 'Quadratic Polls must have specified end time.');
+    require(!isClosed, 'The series has been ended');
+    require(_endDate != 0, 'Quadratic poll needs end date');
 
-    //check if there are previous polls, if so then get allowedVotes from it and check used votes to calculate remaining ones
+    //check if there are previous polls, if so then get allowedVotes and check used votes to calculate remaining ones
     if (polls.length != 0) {
       QuadraticPoll lastPoll = QuadraticPoll(polls[polls.length - 1]);
       //check if previous poll has ended, if not then revert
       (bool isFinished, ) = lastPoll.isFinished();
-      require(isFinished, 'Last poll in the series has not yet ended, cannot add new one.');
+      require(isFinished, 'Previous poll not finished');
       for (uint256 i = 0; i < voters.length; i++) {
         allowedVotesThroughoutSeries[voters[i]] -= lastPoll.allowedVotes(voters[i]);
       }
@@ -70,7 +70,7 @@ contract QuadraticVotingSeries {
   }
 
   function closeSeries() external returns (bool) {
-    require(msg.sender == owner, 'Only owner can close the series.');
+    require(msg.sender == owner, 'Only owner can close the series');
     isClosed = true;
     return true;
   }
