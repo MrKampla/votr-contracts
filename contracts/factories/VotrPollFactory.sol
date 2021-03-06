@@ -1,13 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.4.22 <0.8.0;
 
+import '../polls/BasePoll.sol';
 import '../polls/FirstPastThePostPoll.sol';
 import '../polls/CumulativePoll.sol';
 import '../polls/EvaluativePoll.sol';
 
 contract VotrPollFactory {
   uint256 public numberOfPolls;
-  event PollCreated(address indexed owner, address indexed pollType);
+  event PollCreated(address indexed owner, address indexed pollAddress, string pollType);
   enum PollType { FirstPastThePost, Cumulative, Evaluative }
 
   function createPoll(
@@ -55,7 +56,7 @@ contract VotrPollFactory {
   }
 
   function _createPoll(address owner, address poll) internal returns (address) {
-    emit PollCreated(owner, poll);
+    emit PollCreated(owner, poll, BasePoll(poll).pollType());
     numberOfPolls++;
     return poll;
   }
