@@ -18,6 +18,6 @@ contract CumulativePoll is BasePoll {
     public
     BasePoll(_chairman, _title, _description, _choices, _voters, _allowedVotes, _quorum, _endDate, _allowVoteDelegation)
   {
-    pollType = 'Cumulative poll';
+    pollType = 'Cumulative';
   }
 }

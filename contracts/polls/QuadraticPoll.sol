@@ -18,7 +18,7 @@ contract QuadraticPoll is BasePoll {
     public
     BasePoll(_chairman, _title, _description, _choices, _voters, _allowedVotes, _quorum, _endDate, _allowVoteDelegation)
   {
-    pollType = 'Quadratic poll';
+    pollType = 'Quadratic';
   }
 
   function vote(uint256 choice, int256 amountOfVotes)

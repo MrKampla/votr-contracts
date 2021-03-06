@@ -27,7 +27,7 @@ contract FirstPastThePostPoll is BasePoll {
       _allowVoteDelegation
     )
   {
-    pollType = 'First-past-the-post poll';
+    pollType = 'FirstPastThePost';
   }
 
   function prepeareAllowedVotes(address[] memory _voters) internal pure returns (uint256[] memory) {

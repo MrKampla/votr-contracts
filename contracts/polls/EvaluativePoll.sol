@@ -29,7 +29,7 @@ contract EvaluativePoll is BasePoll {
       false
     )
   {
-    pollType = 'Evaluative poll';
+    pollType = 'Evaluative';
   }
 
   function vote(uint256 choice, int256 amountOfVotes)
