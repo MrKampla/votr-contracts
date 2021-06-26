@@ -1,5 +1,5 @@
-let EvaluativePoll = artifacts.require('./EvaluativePoll.sol');
-let { prepeareParamsEvaluativePoll } = require('./defaultPollparams');
+const EvaluativePoll = artifacts.require('./EvaluativePoll.sol');
+const { prepeareParamsEvaluativePoll } = require('./defaultPollparams');
 const { expectRevert } = require('@openzeppelin/test-helpers');
 
 contract('EvaluativePoll', async accounts => {
@@ -52,3 +52,5 @@ contract('EvaluativePoll', async accounts => {
     await expectRevert(pollContract.delegateVote(accounts[3], 1, { from: accounts[0] }), 'Vote delegation is disabled');
   });
 });
+
+export { };

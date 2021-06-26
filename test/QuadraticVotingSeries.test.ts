@@ -1,6 +1,6 @@
-let QuadraticVotingSeries = artifacts.require('./QuadraticVotingSeries.sol');
-let QuadraticPoll = artifacts.require('./QuadraticPoll.sol');
-let { prepeareParamsQuadraticSeries, prepeareParamsAddNewPollToQuadraticSeries } = require('./defaultPollparams');
+const QuadraticVotingSeries = artifacts.require('./QuadraticVotingSeries.sol');
+const QuadraticPoll = artifacts.require('./QuadraticPoll.sol');
+const { prepeareParamsQuadraticSeries, prepeareParamsAddNewPollToQuadraticSeries } = require('./defaultPollparams');
 const { expectRevert } = require('@openzeppelin/test-helpers');
 
 contract('QuadraticVotingSeries', async accounts => {
@@ -42,3 +42,5 @@ contract('QuadraticVotingSeries', async accounts => {
     );
   });
 });
+
+export { };

@@ -1,5 +1,5 @@
-let CumulativePoll = artifacts.require('./CumulativePoll.sol');
-let { prepeareParamsCumulativePoll } = require('./defaultPollparams');
+const CumulativePoll = artifacts.require('./CumulativePoll.sol');
+const { prepeareParamsCumulativePoll } = require('./defaultPollparams');
 
 contract('CumulativePoll', async (accounts) => {
   let pollContract;
@@ -42,3 +42,5 @@ contract('CumulativePoll', async (accounts) => {
     assert.equal(shouldBeFinished, true);
   });
 });
+
+export { };

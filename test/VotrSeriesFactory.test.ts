@@ -1,5 +1,5 @@
-let SeriesFactory = artifacts.require('./VotrSeriesFactory.sol');
-let QuadraticVotingSeries = artifacts.require('./QuadraticVotingSeries.sol');
+const SeriesFactory = artifacts.require('./VotrSeriesFactory.sol');
+const QuadraticVotingSeries = artifacts.require('./QuadraticVotingSeries.sol');
 const { prepeareParamsQuadraticSeries } = require('./defaultPollparams');
 const { expectEvent } = require('@openzeppelin/test-helpers');
 
@@ -24,3 +24,5 @@ contract('VotrSeriesFactory', async (accounts) => {
     await expectEvent(await seriesContract.createSeries(...params), 'SeriesCreated');
   });
 });
+
+export { };

@@ -1,4 +1,4 @@
-let PollFactory = artifacts.require('./VotrPollFactory.sol');
+const PollFactory = artifacts.require('./VotrPollFactory.sol');
 const FirstPastThePostPoll = artifacts.require('./FirstPastThePostPoll.sol');
 const { prepeareParamsToFPTPPollFromFactory } = require('./defaultPollparams');
 const { expectEvent } = require('@openzeppelin/test-helpers');
@@ -26,3 +26,5 @@ contract('VotrPollFactory', async accounts => {
     assert.equal(receipt.logs[0].args.pollType, 'FirstPastThePost');
   });
 });
+
+export { };

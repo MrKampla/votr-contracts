@@ -1,5 +1,5 @@
-let QuadraticPoll = artifacts.require('./QuadraticPoll.sol');
-let { prepeareParamsQuadraticPoll } = require('./defaultPollparams');
+const QuadraticPoll = artifacts.require('./QuadraticPoll.sol');
+const { prepeareParamsQuadraticPoll } = require('./defaultPollparams');
 const { expectRevert } = require('@openzeppelin/test-helpers');
 
 contract('QuadraticPoll', async (accounts) => {
@@ -49,3 +49,5 @@ contract('QuadraticPoll', async (accounts) => {
     assert.equal(shouldBeFinished, true);
   });
 });
+
+export { };

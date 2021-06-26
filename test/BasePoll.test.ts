@@ -1,5 +1,5 @@
-let BasePoll = artifacts.require('./BasePoll.sol');
-let { prepeareParamsBasePoll } = require('./defaultPollparams');
+const BasePoll = artifacts.require('./BasePoll.sol');
+const { prepeareParamsBasePoll } = require('./defaultPollparams');
 const { expectEvent, expectRevert } = require('@openzeppelin/test-helpers');
 const Web3 = require('web3');
 
@@ -88,3 +88,5 @@ contract('BasePoll', async accounts => {
     await expectRevert(BasePoll.new(...paramsArr), 'The end date cannot be in past.');
   });
 });
+
+export { };
