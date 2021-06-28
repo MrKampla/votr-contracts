@@ -1,11 +1,11 @@
-const QuadraticPoll = artifacts.require('./QuadraticPoll.sol');
+const QuadraticPoll = artifacts.require('QuadraticPoll');
 const { prepeareParamsQuadraticPoll } = require('./defaultPollparams');
 const { expectRevert } = require('@openzeppelin/test-helpers');
 
 contract('QuadraticPoll', async (accounts) => {
   let pollContract;
   beforeEach(async () => {
-    pollContract = await QuadraticPoll.new(...prepeareParamsQuadraticPoll(accounts.slice(0, 2)));
+    pollContract = await QuadraticPoll.new(...prepeareParamsQuadraticPoll(accounts.slice(0, 2)) as Parameters<typeof QuadraticPoll.new>);
   });
 
   it('Single Quadratic vote works', async () => {

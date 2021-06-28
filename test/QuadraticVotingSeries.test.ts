@@ -1,12 +1,12 @@
-const QuadraticVotingSeries = artifacts.require('./QuadraticVotingSeries.sol');
-const QuadraticPoll = artifacts.require('./QuadraticPoll.sol');
+const QuadraticVotingSeries = artifacts.require('QuadraticVotingSeries');
+const QuadraticPoll = artifacts.require('QuadraticPoll');
 const { prepeareParamsQuadraticSeries, prepeareParamsAddNewPollToQuadraticSeries } = require('./defaultPollparams');
 const { expectRevert } = require('@openzeppelin/test-helpers');
 
 contract('QuadraticVotingSeries', async accounts => {
   let seriesContract;
   beforeEach(async () => {
-    seriesContract = await QuadraticVotingSeries.new(...prepeareParamsQuadraticSeries(accounts.slice(0, 2)));
+    seriesContract = await QuadraticVotingSeries.new(...prepeareParamsQuadraticSeries(accounts.slice(0, 2)) as Parameters<typeof QuadraticVotingSeries.new>);
   });
 
   it('new poll in series successfuly', async () => {
@@ -24,7 +24,7 @@ contract('QuadraticVotingSeries', async accounts => {
     assert.equal((await seriesContract.getNumberOfPollsInTheSeries()).toNumber(), 1);
     const pollContractAddresss = await seriesContract.polls(0);
     const pollInstance = await QuadraticPoll.at(pollContractAddresss);
-    const { finished } = await pollInstance.isFinished();
+    const { 0: finished } = await pollInstance.isFinished();
     assert.equal(finished, false);
     await expectRevert(
       seriesContract.addPoll(...prepeareParamsAddNewPollToQuadraticSeries()),

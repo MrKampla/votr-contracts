@@ -1,4 +1,4 @@
-const BasePoll = artifacts.require('./BasePoll.sol');
+const BasePoll = artifacts.require('BasePoll');
 const { prepeareParamsBasePoll } = require('./defaultPollparams');
 const { expectEvent, expectRevert } = require('@openzeppelin/test-helpers');
 const Web3 = require('web3');
@@ -6,7 +6,7 @@ const Web3 = require('web3');
 contract('BasePoll', async accounts => {
   let pollContract;
   beforeEach(async () => {
-    pollContract = await BasePoll.new(...prepeareParamsBasePoll(accounts.slice(0, 2)));
+    pollContract = await BasePoll.new(...prepeareParamsBasePoll(accounts.slice(0, 2)) as Parameters<typeof BasePoll.new>);
   });
 
   it('Initializes with correct amount of choices', async () => {
@@ -58,6 +58,8 @@ contract('BasePoll', async accounts => {
     assert.equal(selectedOption.voteCount, 2);
     const { finished } = await pollContract.isFinished();
     assert.equal(finished, true);
+    const winner = await pollContract.checkWinner();
+    assert.equal(winner.toNumber(), 1);
   });
 
   it('Correctly returns winner', async () => {
@@ -85,7 +87,7 @@ contract('BasePoll', async accounts => {
     let paramsArr = prepeareParamsBasePoll(accounts.slice(0, 2));
     paramsArr.splice(-2, 2);
     paramsArr = paramsArr.concat([dateInPast, true]);
-    await expectRevert(BasePoll.new(...paramsArr), 'The end date cannot be in past.');
+    await expectRevert(BasePoll.new(...paramsArr as Parameters<typeof BasePoll.new>), 'The end date cannot be in past.');
   });
 });
 

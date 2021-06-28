@@ -1,10 +1,10 @@
-const CumulativePoll = artifacts.require('./CumulativePoll.sol');
+const CumulativePoll = artifacts.require('CumulativePoll');
 const { prepeareParamsCumulativePoll } = require('./defaultPollparams');
 
 contract('CumulativePoll', async (accounts) => {
   let pollContract;
   beforeEach(async () => {
-    pollContract = await CumulativePoll.new(...prepeareParamsCumulativePoll());
+    pollContract = await CumulativePoll.new(...prepeareParamsCumulativePoll() as Parameters<typeof CumulativePoll.new>);
   });
 
   it('Single multivote works', async () => {

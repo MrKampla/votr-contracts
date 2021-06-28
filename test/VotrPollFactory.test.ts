@@ -1,5 +1,5 @@
-const PollFactory = artifacts.require('./VotrPollFactory.sol');
-const FirstPastThePostPoll = artifacts.require('./FirstPastThePostPoll.sol');
+const PollFactory = artifacts.require('VotrPollFactory');
+const FirstPastThePostPoll = artifacts.require('FirstPastThePostPoll');
 const { prepeareParamsToFPTPPollFromFactory } = require('./defaultPollparams');
 const { expectEvent } = require('@openzeppelin/test-helpers');
 
@@ -13,7 +13,7 @@ contract('VotrPollFactory', async accounts => {
     const res = await factoryContract.createPoll(0, ...prepeareParamsToFPTPPollFromFactory(accounts.slice(0, 2)));
     const createdPoll = await FirstPastThePostPoll.at(res.logs[0].args.pollAddress);
     assert.equal(await createdPoll.pollType(), 'FirstPastThePost');
-    assert.equal(await factoryContract.numberOfPolls(), 1);
+    assert.equal(await factoryContract.allPollsLength(), 1);
   });
 
   it('Emits event on new poll creation', async () => {

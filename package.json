@@ -8,6 +8,8 @@
   "scripts": {
     "test": "truffle test",
     "truffle:version": "truffle version",
+    "prettier": "prettier --write 'contracts/**/*.sol'",
+    "typechain": "typechain --target=truffle-v5 './build/contracts/*.json'",
     "ganache": "ganache-cli -m \"problem used theory volcano daring enough much spray sail steak finish loop\" --networkId 4447",
     "deploy": "truffle migrate",
     "lint": "solhint 'contracts/**/*.sol'"
@@ -20,6 +22,8 @@
     "@types/mocha": "^8.2.2",
     "@types/node": "^15.12.4",
     "ganache-cli": "^6.12.2",
+    "prettier": "^2.3.2",
+    "prettier-plugin-solidity": "^1.0.0-beta.13",
     "solhint": "^3.3.3",
     "truffle": "^5.3.12",
     "truffle-typings": "^1.0.8",

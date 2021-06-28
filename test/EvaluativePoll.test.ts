@@ -1,11 +1,11 @@
-const EvaluativePoll = artifacts.require('./EvaluativePoll.sol');
+const EvaluativePoll = artifacts.require('EvaluativePoll');
 const { prepeareParamsEvaluativePoll } = require('./defaultPollparams');
 const { expectRevert } = require('@openzeppelin/test-helpers');
 
 contract('EvaluativePoll', async accounts => {
   let pollContract;
   beforeEach(async () => {
-    pollContract = await EvaluativePoll.new(...prepeareParamsEvaluativePoll(accounts.slice(0, 2)));
+    pollContract = await EvaluativePoll.new(...prepeareParamsEvaluativePoll(accounts.slice(0, 2)) as Parameters<typeof EvaluativePoll.new>);
   });
 
   it('Single disapproval vote works', async () => {
