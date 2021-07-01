@@ -29,4 +29,9 @@ contract VotrPoll is ERC20PresetMinterPauser {
     title = _pollSettings.title;
     _mint(msg.sender, 1000);
   }
+
+  function vote(uint256[] memory _choices, int256[] memory amountOfVotes) public returns (bool) {
+    IVotrPollFactory(_votrFactory).emitVotedEvent(msg.sender, _choices, amountOfVotes);
+    return true;
+  }
 }

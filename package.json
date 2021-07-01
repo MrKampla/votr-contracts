@@ -10,7 +10,7 @@
     "test:watch": "nodemon --watch ./test --ext 'ts' --exec 'truffle test'",
     "truffle:version": "truffle version",
     "prettier": "prettier --write 'contracts/**/*.sol'",
-    "typechain": "typechain --target=truffle-v5 './build/contracts/*.json'",
+    "typegen": "rm -rf types && truffle compile && typechain --target=truffle-v5 './build/contracts/*.json'",
     "ganache": "ganache-cli -m \"problem used theory volcano daring enough much spray sail steak finish loop\" --networkId 4447",
     "deploy": "truffle migrate",
     "lint": "solhint 'contracts/**/*.sol'"

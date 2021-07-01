@@ -41,7 +41,6 @@ contract('VotrPollFactory', (accounts) => {
       expect((await pollFactory.numberOfPolls()).toNumber()).to.equal(1);
       expect(await pollFactory.doesPollExist(createdPoll.address)).to.be.true;
       const addr = await pollFactory.allPolls(0);
-      console.log(addr);
       expect(addr).to.be.not.equal(ZERO_ADDRESS);
       expect(await createdPoll.name()).to.equal('vToken');
     });
@@ -61,11 +60,19 @@ contract('VotrPollFactory', (accounts) => {
     });
 
     it('emits Voted event whenever someone votes in any poll', async () => {
-      // const firstPollCreationTransaction = await pollFactory.createPoll(...defaultPollCreationParams(accounts));
-      // const secondPollCreationTransaction = await pollFactory.createPoll(...defaultPollCreationParams(accounts));
-      // const firstPoll = await VotrPoll.at(firstPollCreationTransaction.logs[0].args.pollAddress);
-      // const secondPoll = await VotrPoll.at(secondPollCreationTransaction.logs[0].args.pollAddress);
-      // firstPoll.vote();
+      const firstPollCreationTransaction = await pollFactory.createPoll(...defaultPollCreationParams(accounts));
+      const secondPollCreationTransaction = await pollFactory.createPoll(...defaultPollCreationParams(accounts));
+      const firstPoll = await VotrPoll.at(firstPollCreationTransaction.logs[0].args.pollAddress);
+      const secondPoll = await VotrPoll.at(secondPollCreationTransaction.logs[0].args.pollAddress);
+      await firstPoll.vote([web3.utils.fromAscii('choice1')], [1]);
+      await secondPoll.vote([web3.utils.fromAscii('choice2')], [2], { from: accounts[1] });
+
+      const events = await pollFactory.getPastEvents('Voted', { fromBlock: 0 });
+      [0, 1].forEach((i) => {
+        expect(events[i].event).to.equal('Voted');
+        expect((events[i] as any).args.who).to.equal(accounts[i]);
+        expect((events[i] as any).args.votesAmount[0].toNumber()).to.equal(i + 1);
+      });
     });
   });
 });
