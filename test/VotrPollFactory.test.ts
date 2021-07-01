@@ -1,30 +1,71 @@
-const PollFactory = artifacts.require('VotrPollFactory');
-const FirstPastThePostPoll = artifacts.require('FirstPastThePostPoll');
-const { prepeareParamsToFPTPPollFromFactory } = require('./defaultPollparams');
-const { expectEvent } = require('@openzeppelin/test-helpers');
+import { expect } from 'chai';
+import { VotrPollFactoryInstance } from 'types/truffle-contracts';
+import { constants, expectEvent, expectRevert } from '@openzeppelin/test-helpers';
+import web3 from 'web3';
 
-contract('VotrPollFactory', async accounts => {
-  let factoryContract;
+const VotrPoll = artifacts.require('VotrPoll');
+const VotrPollFactoryContract = artifacts.require('VotrPollFactory');
+
+const ZERO_ADDRESS = constants.ZERO_ADDRESS;
+
+let pollFactory: VotrPollFactoryInstance;
+type PollCreationParamsCreator = (accounts: Truffle.Accounts) => Parameters<typeof pollFactory.createPoll>;
+
+const defaultPollCreationParams: PollCreationParamsCreator = (accounts) => [
+  ZERO_ADDRESS,
+  { basedOnToken: ZERO_ADDRESS, name: 'vToken', symbol: 'VTK' },
+  {
+    allowVoteDelegation: false,
+    description: 'description',
+    endDate: new Date().getTime() + 60 * 2 * 1000,
+    quorum: 2,
+    title: 'title',
+  },
+  [web3.utils.fromAscii('choice1'), web3.utils.fromAscii('choice2')],
+  [
+    { addr: accounts[0], allowedVotes: 1 },
+    { addr: accounts[1], allowedVotes: 1 },
+  ],
+];
+
+contract('VotrPollFactory', (accounts) => {
   beforeEach(async () => {
-    factoryContract = await PollFactory.new();
+    pollFactory = await VotrPollFactoryContract.new();
   });
 
-  it('Successfully creates new poll', async () => {
-    const res = await factoryContract.createPoll(0, ...prepeareParamsToFPTPPollFromFactory(accounts.slice(0, 2)));
-    const createdPoll = await FirstPastThePostPoll.at(res.logs[0].args.pollAddress);
-    assert.equal(await createdPoll.pollType(), 'FirstPastThePost');
-    assert.equal(await factoryContract.allPollsLength(), 1);
+  describe('poll creation', () => {
+    it('creates new poll correctly', async () => {
+      const pollCreationTransaction = await pollFactory.createPoll(...defaultPollCreationParams(accounts));
+      const createdPoll = await VotrPoll.at(pollCreationTransaction.logs[0].args.pollAddress);
+      expect(createdPoll).to.be.not.undefined;
+      expect((await pollFactory.numberOfPolls()).toNumber()).to.equal(1);
+      expect(await pollFactory.doesPollExist(createdPoll.address)).to.be.true;
+      const addr = await pollFactory.allPolls(0);
+      console.log(addr);
+      expect(addr).to.be.not.equal(ZERO_ADDRESS);
+      expect(await createdPoll.name()).to.equal('vToken');
+    });
+
+    it('emits PollCreated event on poll creation', async () => {
+      const pollCreationTransaction = pollFactory.createPoll(...defaultPollCreationParams(accounts));
+      await expectEvent(await pollCreationTransaction, 'PollCreated');
+    });
   });
 
-  it('Emits event on new poll creation', async () => {
-    const receipt = factoryContract.createPoll(0, ...prepeareParamsToFPTPPollFromFactory(accounts.slice(0, 2)));
-    await expectEvent(await receipt, 'PollCreated');
-  });
+  describe('vote tracking', () => {
+    it('prohibits calling emitVotedEvent by non-Votr contract', async () => {
+      await expectRevert(
+        pollFactory.emitVotedEvent(ZERO_ADDRESS, [web3.utils.fromAscii('choice1')], [1]),
+        'Callable only by Votr polls'
+      );
+    });
 
-  it('Poll created emits poll type correctly', async () => {
-    const receipt = await factoryContract.createPoll(0, ...prepeareParamsToFPTPPollFromFactory(accounts.slice(0, 2)));
-    assert.equal(receipt.logs[0].args.pollType, 'FirstPastThePost');
+    it('emits Voted event whenever someone votes in any poll', async () => {
+      // const firstPollCreationTransaction = await pollFactory.createPoll(...defaultPollCreationParams(accounts));
+      // const secondPollCreationTransaction = await pollFactory.createPoll(...defaultPollCreationParams(accounts));
+      // const firstPoll = await VotrPoll.at(firstPollCreationTransaction.logs[0].args.pollAddress);
+      // const secondPoll = await VotrPoll.at(secondPollCreationTransaction.logs[0].args.pollAddress);
+      // firstPoll.vote();
+    });
   });
 });
-
-export { };

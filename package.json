@@ -7,6 +7,7 @@
   },
   "scripts": {
     "test": "truffle test",
+    "test:watch": "nodemon --watch ./test --ext 'ts' --exec 'truffle test'",
     "truffle:version": "truffle version",
     "prettier": "prettier --write 'contracts/**/*.sol'",
     "typechain": "typechain --target=truffle-v5 './build/contracts/*.json'",
@@ -17,11 +18,13 @@
   "author": "Kamil Planer <mrkampla@gmail.com>",
   "license": "MIT",
   "devDependencies": {
+    "@openzeppelin/test-helpers": "^0.5.11",
     "@typechain/truffle-v5": "^5.0.0",
     "@types/chai": "^4.2.19",
     "@types/mocha": "^8.2.2",
     "@types/node": "^15.12.4",
     "ganache-cli": "^6.12.2",
+    "nodemon": "^2.0.9",
     "prettier": "^2.3.2",
     "prettier-plugin-solidity": "^1.0.0-beta.13",
     "solhint": "^3.3.3",
@@ -29,10 +32,10 @@
     "truffle-typings": "^1.0.8",
     "ts-node": "^10.0.0",
     "typechain": "^5.1.1",
-    "typescript": "^4.3.4"
+    "typescript": "^4.3.4",
+    "web3": "^1.4.0"
   },
   "dependencies": {
-    "@openzeppelin/contracts": "^4.1.0",
-    "@openzeppelin/test-helpers": "^0.5.10"
+    "@openzeppelin/contracts": "^4.1.0"
   }
 }
