@@ -13,7 +13,7 @@ contract VotrPollFactory is IVotrPollFactory {
     address _pollType,
     TokenSettings memory _tokenSettings,
     PollSettings memory _pollSettings,
-    bytes32[] memory _choices,
+    string[] memory _choices,
     Voter[] memory _voters
   ) external override returns (address) {
     VotrPoll poll = new VotrPoll(

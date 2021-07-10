@@ -37,6 +37,20 @@ contract('VotrPoll', (accounts) => {
       }
     });
 
+    it('Each choice is correctly saved', async () => {
+      const pollCreationParams = prepearePollCreationParams(
+        {
+          pollTypeAddress: FirstPastThePostPollType.address,
+        },
+        accounts
+      );
+      const pollCreationTransaction = await pollFactory.createPoll(...pollCreationParams);
+      const createdPoll = await VotrPollContract.at(pollCreationTransaction.logs[0].args.pollAddress);
+      for await (const i of [0, 1]) {
+        expect(await createdPoll.choices(i)).to.be.equal(`choice${i + 1}`);
+      }
+    });
+
     it('creates vToken based on existing token', async () => {
       const testTokenContract = await ERC20Contract.new('TEST TOKEN', 'TST');
       await testTokenContract.mint(accounts[0], 1);

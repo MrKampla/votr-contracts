@@ -10,7 +10,7 @@ contract VotrPoll is ERC20PresetMinterPauser, ERC20Locker {
   string public title;
   string public description;
   address[] public voters;
-  bytes32[] public choices;
+  string[] public choices;
   address public chairman;
   bool public allowVoteDelegation;
   uint256 public quorum;
@@ -22,7 +22,7 @@ contract VotrPoll is ERC20PresetMinterPauser, ERC20Locker {
     address _pollType,
     IVotrPollFactory.TokenSettings memory _tokenSettings,
     IVotrPollFactory.PollSettings memory _pollSettings,
-    bytes32[] memory _choices,
+    string[] memory _choices,
     IVotrPollFactory.Voter[] memory _voters
   )
     ERC20PresetMinterPauser(_tokenSettings.name, _tokenSettings.symbol)

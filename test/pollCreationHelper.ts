@@ -37,7 +37,7 @@ export const prepearePollCreationParams: (
     quorum: 2,
     title: 'title',
   },
-  [web3.utils.fromAscii('choice1'), web3.utils.fromAscii('choice2')],
+  ['choice1', 'choice2'],
   voters ?? [
     { addr: accounts[1], allowedVotes: 1 },
     { addr: accounts[2], allowedVotes: 2 },
