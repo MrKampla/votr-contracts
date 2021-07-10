@@ -2,13 +2,11 @@
 pragma solidity ^0.8.0;
 import '../interfaces/IVotrPollFactory.sol';
 import '../interfaces/IPollType.sol';
+import './ERC20Locker.sol';
 import '@openzeppelin/contracts/token/ERC20/presets/ERC20PresetMinterPauser.sol';
-import '@openzeppelin/contracts/token/ERC20/extensions/ERC20Wrapper.sol';
 
-contract VotrPoll is ERC20PresetMinterPauser, ERC20Wrapper {
+contract VotrPoll is ERC20PresetMinterPauser, ERC20Locker {
   address private _votrFactory;
-  address public pollType;
-
   string public title;
   string public description;
   address[] public voters;
@@ -17,7 +15,6 @@ contract VotrPoll is ERC20PresetMinterPauser, ERC20Wrapper {
   bool public allowVoteDelegation;
   uint256 public quorum;
   uint256 public endDate;
-  mapping(address => uint256) public amountOfUnderlyingTokenDeposited;
 
   constructor(
     address _chairman,
@@ -29,7 +26,7 @@ contract VotrPoll is ERC20PresetMinterPauser, ERC20Wrapper {
     IVotrPollFactory.Voter[] memory _voters
   )
     ERC20PresetMinterPauser(_tokenSettings.name, _tokenSettings.symbol)
-    ERC20Wrapper(IERC20(_tokenSettings.basedOnToken))
+    ERC20Locker(IERC20(_tokenSettings.basedOnToken), _pollType)
   {
     _votrFactory = votrFactory_;
     chairman = _chairman;
@@ -92,27 +89,5 @@ contract VotrPoll is ERC20PresetMinterPauser, ERC20Wrapper {
     uint256 amount
   ) internal virtual override(ERC20PresetMinterPauser, ERC20) {
     super._beforeTokenTransfer(from, to, amount);
-  }
-
-  function lock(uint256 amount) public {
-    // increase voting power with longer locking periods
-    amountOfUnderlyingTokenDeposited[msg.sender] += amount;
-    depositFor(msg.sender, amount);
-    _approve(msg.sender, pollType, amount);
-  }
-
-  function unlock(uint256 amount) public {
-    require(amount <= amountOfUnderlyingTokenDeposited[msg.sender], 'Unlock amount exceeds deposited amount');
-    amountOfUnderlyingTokenDeposited[msg.sender] -= amount;
-    uint256 amountOfTokensToBurn = min(balanceOf(msg.sender), amount);
-    _burn(msg.sender, amountOfTokensToBurn);
-    IERC20(underlying).transfer(msg.sender, amount);
-    unchecked {
-      _approve(msg.sender, pollType, allowance(msg.sender, pollType) - amount);
-    }
-  }
-
-  function min(uint256 x, uint256 y) internal pure returns (uint256 z) {
-    return x <= y ? x : y;
   }
 }
