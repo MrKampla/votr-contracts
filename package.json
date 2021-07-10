@@ -10,6 +10,7 @@
     "test:watch": "nodemon --watch ./test --ext 'ts' --exec 'truffle test'",
     "truffle:version": "truffle version",
     "prettier": "prettier --write 'contracts/**/*.sol'",
+    "postinstall": "yarn typegen",
     "typegen": "rm -rf types && truffle compile && typechain --target=truffle-v5 './build/contracts/*.json'",
     "ganache": "ganache-cli -m \"problem used theory volcano daring enough much spray sail steak finish loop\" --networkId 4447",
     "deploy": "truffle migrate",
@@ -36,6 +37,6 @@
     "web3": "^1.4.0"
   },
   "dependencies": {
-    "@openzeppelin/contracts": "^4.1.0"
+    "@openzeppelin/contracts": "^4.2.0"
   }
 }

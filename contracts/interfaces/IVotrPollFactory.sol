@@ -13,6 +13,7 @@ interface IVotrPollFactory {
   struct PollSettings {
     string title;
     string description;
+    address chairman;
     uint256 quorum;
     uint256 endDate;
     bool allowVoteDelegation;
@@ -36,16 +37,3 @@ interface IVotrPollFactory {
     int256[] memory votesAmount
   ) external;
 }
-
-// OLD syntax
-// function createPoll(
-//   address _pollType,
-//   string memory _title,
-//   string memory _description,
-//   bytes32[] memory _choices,
-//   address[] memory _voters,
-//   uint256[] memory _allowedVotes,
-//   uint256 _quorum,
-//   uint256 _endDate,
-//   bool _allowVoteDelegation
-// ) external returns (address);
