@@ -1,3 +1,7 @@
+require('ts-node').register({
+  files: true,
+});
+
 module.exports = {
   // See <http://truffleframework.com/docs/advanced/configuration>
   // for more about customizing your Truffle configuration!
@@ -16,7 +20,7 @@ module.exports = {
   },
   compilers: {
     solc: {
-      version: '0.6.8',
+      version: '0.8.6',
       settings: {
         optimizer: {
           enabled: true,
