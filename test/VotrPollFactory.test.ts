@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import { FirstPastThePostPollTypeInstance, VotrPollFactoryInstance } from 'types/truffle-contracts';
 import { constants, expectEvent, expectRevert } from '@openzeppelin/test-helpers';
 import web3 from 'web3';
-import { prepearePollCreationParams } from './pollCreationHelper';
+import { prepearePollCreationParams } from './pollTestHelpers';
 
 const VotrPoll = artifacts.require('VotrPoll');
 const VotrPollFactoryContract = artifacts.require('VotrPollFactory');
@@ -22,7 +22,7 @@ contract('VotrPollFactory', (accounts) => {
   describe('poll creation', () => {
     it('creates new poll correctly', async () => {
       const pollCreationTransaction = await pollFactory.createPoll(
-        ...prepearePollCreationParams({ pollTypeAddress: firstPastThePostPollType.address }, accounts)
+        ...(await prepearePollCreationParams({ pollTypeAddress: firstPastThePostPollType.address }, accounts))
       );
       const createdPoll = await VotrPoll.at(pollCreationTransaction.logs[0].args.pollAddress);
       expect(createdPoll).to.be.not.undefined;
@@ -35,7 +35,7 @@ contract('VotrPollFactory', (accounts) => {
 
     it('emits PollCreated event on poll creation', async () => {
       const pollCreationTransaction = pollFactory.createPoll(
-        ...prepearePollCreationParams({ pollTypeAddress: firstPastThePostPollType.address }, accounts)
+        ...(await prepearePollCreationParams({ pollTypeAddress: firstPastThePostPollType.address }, accounts))
       );
       await expectEvent(await pollCreationTransaction, 'PollCreated');
     });
@@ -51,7 +51,7 @@ contract('VotrPollFactory', (accounts) => {
 
     it('emits Voted event whenever someone votes in any poll', async () => {
       const firstPollCreationTransaction = await pollFactory.createPoll(
-        ...prepearePollCreationParams(
+        ...(await prepearePollCreationParams(
           {
             pollTypeAddress: firstPastThePostPollType.address,
             voters: [
@@ -60,10 +60,10 @@ contract('VotrPollFactory', (accounts) => {
             ],
           },
           accounts
-        )
+        ))
       );
       const secondPollCreationTransaction = await pollFactory.createPoll(
-        ...prepearePollCreationParams(
+        ...(await prepearePollCreationParams(
           {
             pollTypeAddress: firstPastThePostPollType.address,
             voters: [
@@ -72,7 +72,7 @@ contract('VotrPollFactory', (accounts) => {
             ],
           },
           accounts
-        )
+        ))
       );
       const firstPoll = await VotrPoll.at(firstPollCreationTransaction.logs[0].args.pollAddress);
       const secondPoll = await VotrPoll.at(secondPollCreationTransaction.logs[0].args.pollAddress);

@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import { FirstPastThePostPollTypeInstance, VotrPollFactoryInstance } from 'types/truffle-contracts';
 import { expectRevert, time } from '@openzeppelin/test-helpers';
-import { prepearePollCreationParams } from './pollCreationHelper';
+import { getCurrentTimeInSeconds, prepearePollCreationParams } from './pollTestHelpers';
 
 const VotrPollContract = artifacts.require('VotrPoll');
 const VotrPollFactoryContract = artifacts.require('VotrPollFactory');
@@ -19,7 +19,7 @@ contract('VotrPoll', (accounts) => {
   });
   describe('initialization', () => {
     it('Each voter get specified amount of votes', async () => {
-      const pollCreationParams = prepearePollCreationParams(
+      const pollCreationParams = await prepearePollCreationParams(
         {
           pollTypeAddress: FirstPastThePostPollType.address,
           voters: [
@@ -38,7 +38,7 @@ contract('VotrPoll', (accounts) => {
     });
 
     it('Each choice is correctly saved', async () => {
-      const pollCreationParams = prepearePollCreationParams(
+      const pollCreationParams = await prepearePollCreationParams(
         {
           pollTypeAddress: FirstPastThePostPollType.address,
         },
@@ -54,7 +54,7 @@ contract('VotrPoll', (accounts) => {
     it('creates vToken based on existing token', async () => {
       const testTokenContract = await ERC20Contract.new('TEST TOKEN', 'TST');
       await testTokenContract.mint(accounts[0], 1);
-      const pollCreationParams: PollCreationParams = prepearePollCreationParams(
+      const pollCreationParams: PollCreationParams = await prepearePollCreationParams(
         {
           pollTypeAddress: FirstPastThePostPollType.address,
           token: {
@@ -66,7 +66,8 @@ contract('VotrPoll', (accounts) => {
       const pollCreationTransaction = await pollFactory.createPoll(...pollCreationParams);
       const createdPoll = await VotrPollContract.at(pollCreationTransaction.logs[0].args.pollAddress);
       await testTokenContract.approve(createdPoll.address, 1, { from: accounts[0] });
-      await createdPoll.lock(1, { from: accounts[0] });
+      const ONE_MINUTE_IN_SECONDS = 60;
+      await createdPoll.lock(1, (await getCurrentTimeInSeconds()) + ONE_MINUTE_IN_SECONDS, { from: accounts[0] });
 
       expect((await createdPoll.balanceOf(accounts[0])).toNumber()).to.be.equal(1);
       expect((await testTokenContract.balanceOf(accounts[0])).toNumber()).to.be.equal(0);
@@ -78,7 +79,7 @@ contract('VotrPoll', (accounts) => {
     it('should be exchangeable for underlying token', async () => {
       const testTokenContract = await ERC20Contract.new('TEST TOKEN', 'TST');
       await testTokenContract.mint(accounts[0], 1);
-      const pollCreationParams: PollCreationParams = prepearePollCreationParams(
+      const pollCreationParams: PollCreationParams = await prepearePollCreationParams(
         {
           pollTypeAddress: FirstPastThePostPollType.address,
           token: {
@@ -90,12 +91,13 @@ contract('VotrPoll', (accounts) => {
       const pollCreationTransaction = await pollFactory.createPoll(...pollCreationParams);
       const createdPoll = await VotrPollContract.at(pollCreationTransaction.logs[0].args.pollAddress);
       await testTokenContract.approve(createdPoll.address, 1, { from: accounts[0] });
-      await createdPoll.lock(1, { from: accounts[0] });
+      const ONE_MINUTE_IN_SECONDS = 60;
+      await createdPoll.lock(1, (await getCurrentTimeInSeconds()) + ONE_MINUTE_IN_SECONDS, { from: accounts[0] });
 
       expect((await createdPoll.balanceOf(accounts[0])).toNumber()).to.be.equal(1);
       expect((await testTokenContract.balanceOf(accounts[0])).toNumber()).to.be.equal(0);
-
-      await createdPoll.unlock(1, { from: accounts[0] });
+      await time.increase(35 * 60); // 35 minutes
+      await createdPoll.unlockAll({ from: accounts[0] });
       expect((await createdPoll.balanceOf(accounts[0])).toNumber()).to.be.equal(0);
       expect((await testTokenContract.balanceOf(accounts[0])).toNumber()).to.be.equal(1);
     });
@@ -104,7 +106,7 @@ contract('VotrPoll', (accounts) => {
       const testTokenContract = await ERC20Contract.new('TEST TOKEN', 'TST');
       await testTokenContract.mint(accounts[0], 1);
 
-      const pollCreationParams: PollCreationParams = prepearePollCreationParams(
+      const pollCreationParams: PollCreationParams = await prepearePollCreationParams(
         {
           pollTypeAddress: FirstPastThePostPollType.address,
           token: {
@@ -116,21 +118,23 @@ contract('VotrPoll', (accounts) => {
       const pollCreationTransaction = await pollFactory.createPoll(...pollCreationParams);
       const createdPoll = await VotrPollContract.at(pollCreationTransaction.logs[0].args.pollAddress);
       await testTokenContract.approve(createdPoll.address, 1, { from: accounts[0] });
-      await createdPoll.lock(1, { from: accounts[0] });
+      const ONE_MINUTE_IN_SECONDS = 60;
+      await createdPoll.lock(1, (await getCurrentTimeInSeconds()) + ONE_MINUTE_IN_SECONDS, { from: accounts[0] });
 
       expect((await createdPoll.balanceOf(accounts[0])).toNumber()).to.be.equal(1);
       expect((await testTokenContract.balanceOf(accounts[0])).toNumber()).to.be.equal(0);
 
       await createdPoll.vote([1], [1], { from: accounts[0] });
 
-      await createdPoll.unlock(1, { from: accounts[0] });
+      await time.increase(35 * 60); // 35 minutes
+
+      await createdPoll.unlockAll({ from: accounts[0] });
       expect((await createdPoll.balanceOf(accounts[0])).toNumber()).to.be.equal(0);
       expect((await testTokenContract.balanceOf(accounts[0])).toNumber()).to.be.equal(1);
-      await expectRevert(createdPoll.unlock(3, { from: accounts[0] }), 'Unlock amount exceeds deposited amount');
     });
     it('locking fails when user has no underlying token or not enough', async () => {
       const testTokenContract = await ERC20Contract.new('TEST TOKEN', 'TST');
-      const pollCreationParams: PollCreationParams = prepearePollCreationParams(
+      const pollCreationParams: PollCreationParams = await prepearePollCreationParams(
         {
           pollTypeAddress: FirstPastThePostPollType.address,
           token: {
@@ -142,12 +146,31 @@ contract('VotrPoll', (accounts) => {
       const pollCreationTransaction = await pollFactory.createPoll(...pollCreationParams);
       const createdPoll = await VotrPollContract.at(pollCreationTransaction.logs[0].args.pollAddress);
       await testTokenContract.approve(createdPoll.address, 1, { from: accounts[0] });
-      await expectRevert(createdPoll.lock(1, { from: accounts[0] }), 'ERC20: transfer amount exceeds balance');
+      await expectRevert(createdPoll.lock(1, 0, { from: accounts[0] }), 'ERC20: transfer amount exceeds balance');
+    });
+    it('should not allow to unlock deposits until the poll is finished', async () => {
+      const testTokenContract = await ERC20Contract.new('TEST TOKEN', 'TST');
+      await testTokenContract.mint(accounts[0], 1);
+      const pollCreationParams: PollCreationParams = await prepearePollCreationParams(
+        {
+          pollTypeAddress: FirstPastThePostPollType.address,
+          token: {
+            basedOnToken: testTokenContract.address,
+          },
+        },
+        accounts
+      );
+      const pollCreationTransaction = await pollFactory.createPoll(...pollCreationParams);
+      const createdPoll = await VotrPollContract.at(pollCreationTransaction.logs[0].args.pollAddress);
+      await testTokenContract.approve(createdPoll.address, 1, { from: accounts[0] });
+      await createdPoll.lock(1, 0, { from: accounts[0] });
+
+      await expectRevert(createdPoll.unlockAll({ from: accounts[0] }), 'Cannot withdraw funds until poll is finished');
     });
   });
   describe('voting', () => {
     it('single vote works properly', async () => {
-      const pollCreationParams: PollCreationParams = prepearePollCreationParams(
+      const pollCreationParams: PollCreationParams = await prepearePollCreationParams(
         {
           pollTypeAddress: FirstPastThePostPollType.address,
         },
@@ -161,7 +184,7 @@ contract('VotrPoll', (accounts) => {
       expect((await pollType.choiceIdToVoteCount(createdPoll.address, 0)).toNumber()).to.be.equal(1);
     });
     it('multiple votes work properly', async () => {
-      const pollCreationParams: PollCreationParams = prepearePollCreationParams(
+      const pollCreationParams: PollCreationParams = await prepearePollCreationParams(
         {
           pollTypeAddress: FirstPastThePostPollType.address,
         },
@@ -180,7 +203,7 @@ contract('VotrPoll', (accounts) => {
       expect((await pollType.choiceIdToVoteCount(createdPoll.address, 1)).toNumber()).to.be.equal(1);
     });
     it('forbids to vote in poll that user does not have access to', async () => {
-      const pollCreationParams: PollCreationParams = prepearePollCreationParams(
+      const pollCreationParams: PollCreationParams = await prepearePollCreationParams(
         {
           pollTypeAddress: FirstPastThePostPollType.address,
         },
@@ -193,7 +216,7 @@ contract('VotrPoll', (accounts) => {
       await expectRevert(createdPoll.vote([0], [1], { from: accounts[4] }), 'Not enough allowance');
     });
     it('forbids to cast more votes than user is allowed to', async () => {
-      const pollCreationParams: PollCreationParams = prepearePollCreationParams(
+      const pollCreationParams: PollCreationParams = await prepearePollCreationParams(
         {
           pollTypeAddress: FirstPastThePostPollType.address,
         },
@@ -205,7 +228,7 @@ contract('VotrPoll', (accounts) => {
       await expectRevert(createdPoll.vote([0], [3], { from: accounts[1] }), 'Not enough allowance');
     });
     it('forbids to cast a vote if user has no votes to spend', async () => {
-      const pollCreationParams: PollCreationParams = prepearePollCreationParams(
+      const pollCreationParams: PollCreationParams = await prepearePollCreationParams(
         {
           pollTypeAddress: FirstPastThePostPollType.address,
         },
@@ -222,7 +245,7 @@ contract('VotrPoll', (accounts) => {
       expect(await FirstPastThePostPollType.getPollTypeName()).to.be.equal('First Past The Post');
     });
     it('vote delagation works properly', async () => {
-      const pollCreationParams = prepearePollCreationParams(
+      const pollCreationParams = await prepearePollCreationParams(
         {
           pollTypeAddress: FirstPastThePostPollType.address,
           voters: [{ addr: accounts[1], allowedVotes: 1 }],
@@ -244,7 +267,7 @@ contract('VotrPoll', (accounts) => {
       );
     });
     it('vote delagation can be forbidden', async () => {
-      const pollCreationParams = prepearePollCreationParams(
+      const pollCreationParams = await prepearePollCreationParams(
         {
           pollTypeAddress: FirstPastThePostPollType.address,
           voters: [{ addr: accounts[1], allowedVotes: 1 }],
@@ -263,8 +286,8 @@ contract('VotrPoll', (accounts) => {
 
       expect((await createdPoll.balanceOf(accounts[1])).toNumber()).to.be.equal(1);
     });
-    it('correctly returns if is finished', async () => {
-      const pollCreationParams = prepearePollCreationParams(
+    it('correctly returns if is finished or quorum reached', async () => {
+      const pollCreationParams = await prepearePollCreationParams(
         {
           pollTypeAddress: FirstPastThePostPollType.address,
           allowVoteDelegation: false,
@@ -282,13 +305,12 @@ contract('VotrPoll', (accounts) => {
 
       expect((await createdPoll.isFinished())[0]).to.be.equal(false);
       expect((await createdPoll.isFinished())[1]).to.be.equal(true);
-
-      await time.increase(3 * 60); // 3 minutes later
+      await time.increase(31 * 60); // 31 minutes later
 
       expect((await createdPoll.isFinished())[0]).to.be.equal(true);
     });
     it('correctly returns a winner', async () => {
-      const pollCreationParams = prepearePollCreationParams(
+      const pollCreationParams = await prepearePollCreationParams(
         {
           pollTypeAddress: FirstPastThePostPollType.address,
           voters: [{ addr: accounts[1], allowedVotes: 1 }],

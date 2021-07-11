@@ -26,7 +26,7 @@ contract VotrPoll is ERC20PresetMinterPauser, ERC20Locker {
     IVotrPollFactory.Voter[] memory _voters
   )
     ERC20PresetMinterPauser(_tokenSettings.name, _tokenSettings.symbol)
-    ERC20Locker(IERC20(_tokenSettings.basedOnToken), _pollType)
+    ERC20Locker(IERC20(_tokenSettings.basedOnToken), _pollType, address(this))
   {
     _votrFactory = votrFactory_;
     chairman = _chairman;

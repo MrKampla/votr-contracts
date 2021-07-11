@@ -1,10 +1,10 @@
 import { VotrPollFactoryInstance } from 'types/truffle-contracts/VotrPollFactory';
 import { constants } from '@openzeppelin/test-helpers';
-
+import { time } from '@openzeppelin/test-helpers';
 const ZERO_ADDRESS = constants.ZERO_ADDRESS;
 
 let pollFactory: VotrPollFactoryInstance;
-type PollCreationParams = Parameters<typeof pollFactory.createPoll>;
+type PollCreationParams = Promise<Parameters<typeof pollFactory.createPoll>>;
 interface PollCreationConfig {
   pollTypeAddress?: string;
   allowVoteDelegation?: boolean;
@@ -19,10 +19,12 @@ interface PollCreationConfig {
   }[];
 }
 
+export const getCurrentTimeInSeconds = async () => Math.floor(await time.latest());
+
 export const prepearePollCreationParams: (
   config: PollCreationConfig,
   accounts: Truffle.Accounts
-) => PollCreationParams = ({ pollTypeAddress, token, voters, allowVoteDelegation }, accounts) => [
+) => PollCreationParams = async ({ pollTypeAddress, token, voters, allowVoteDelegation }, accounts) => [
   pollTypeAddress ?? ZERO_ADDRESS,
   {
     basedOnToken: token?.basedOnToken ?? ZERO_ADDRESS,
@@ -33,7 +35,7 @@ export const prepearePollCreationParams: (
     allowVoteDelegation: allowVoteDelegation ?? true,
     description: 'description',
     chairman: accounts[0],
-    endDate: Math.floor(new Date().getTime() / 1000) + 60 * 2,
+    endDate: (await getCurrentTimeInSeconds()) + 60 * 30, // 30 minutes from now
     quorum: 2,
     title: 'title',
   },
