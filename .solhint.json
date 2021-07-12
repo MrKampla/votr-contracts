@@ -5,6 +5,7 @@
     "avoid-sha3": "warn",
     "compiler-version": "off",
     "func-visibility": ["warn", { "ignoreConstructors": true }],
-    "quotes": ["warn", "single"]
+    "quotes": ["warn", "single"],
+    "not-rely-on-time": "off"
   }
 }
