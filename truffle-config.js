@@ -18,6 +18,9 @@ module.exports = {
       port: 8545,
     },
   },
+  mocha: {
+    // reporter: 'eth-gas-reporter',
+  },
   compilers: {
     solc: {
       version: '0.8.6',
