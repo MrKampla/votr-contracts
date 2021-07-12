@@ -4,6 +4,10 @@ import '@openzeppelin/contracts/token/ERC20/extensions/ERC20Wrapper.sol';
 import '../interfaces/IVotrPoll.sol';
 
 abstract contract ERC20Locker is ERC20Wrapper {
+  uint32 internal constant SECONDS_IN_YEAR = 31556926;
+  uint32 internal constant INCREASE_OF_VOTING_POWER_PER_SECOND = 105629215; // / 10**16;
+  uint8 internal constant MAX_BONUS_MULTIPLIER = 2;
+
   struct Deposit {
     uint256 id;
     uint256 amountDeposited;
@@ -25,6 +29,7 @@ abstract contract ERC20Locker is ERC20Wrapper {
   }
 
   function lock(uint256 amount, uint256 endDate) public returns (uint256 depositId) {
+    require(amount > 0, 'Cannot lock 0 tokens');
     depositFor(msg.sender, amount);
     Deposit memory deposit = Deposit({
       id: userNextDepositId[msg.sender],
@@ -32,15 +37,29 @@ abstract contract ERC20Locker is ERC20Wrapper {
       startDate: block.timestamp,
       endDate: endDate
     });
+    uint256 bonus = _calculateBonusForLockupPeriod(deposit);
+    require(endDate > block.timestamp || endDate == 0, 'Lockup period cannot end in past');
+    if (endDate != 0) {
+      _mint(msg.sender, _calculateBonusForLockupPeriod(deposit));
+    }
     userNextDepositId[msg.sender]++;
     userDeposits[msg.sender].push(deposit);
-    _approve(msg.sender, pollType, amount);
+    _approve(msg.sender, pollType, amount + bonus);
     return depositId;
   }
 
+  function _calculateBonusForLockupPeriod(Deposit memory deposit) internal pure returns (uint256 bonus) {
+    if (deposit.endDate == 0) return 0;
+    // no need for safe math, since solidity 0.8.0 reverts transaction on underflow
+    uint256 lockupPeriod = deposit.endDate - deposit.startDate;
+    uint256 maxBonusLockupPeriod = SECONDS_IN_YEAR * 3;
+    lockupPeriod = lockupPeriod > maxBonusLockupPeriod ? maxBonusLockupPeriod : lockupPeriod;
+
+    uint256 multiplier = (INCREASE_OF_VOTING_POWER_PER_SECOND * lockupPeriod) * MAX_BONUS_MULTIPLIER;
+    return (deposit.amountDeposited * multiplier) / 10**16;
+  }
+
   function unlockAll() public {
-    (bool isFinished, ) = IVotrPoll(votrPollContract).isFinished();
-    require(isFinished == true, 'Cannot withdraw funds until poll is finished');
     for (uint256 i = 0; i < userDeposits[msg.sender].length; i++) {
       Deposit memory deposit = userDeposits[msg.sender][i];
       _unlock(deposit.id);
