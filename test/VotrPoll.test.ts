@@ -6,6 +6,7 @@ import { prepearePollCreationParams } from './pollTestHelpers';
 const VotrPollContract = artifacts.require('VotrPoll');
 const VotrPollFactoryContract = artifacts.require('VotrPollFactory');
 const FirstPastThePostPollTypeContract = artifacts.require('FirstPastThePostPollType');
+const CallbackExample = artifacts.require('CallbackExample');
 
 let pollFactory: VotrPollFactoryInstance;
 let FirstPastThePostPollType: FirstPastThePostPollTypeInstance;
@@ -208,6 +209,86 @@ contract('VotrPoll', (accounts) => {
       await createdPoll.vote([1], [1], { from: accounts[1] });
 
       expect((await createdPoll.checkWinner()).toNumber()).to.be.equal(1);
+    });
+  });
+  describe('callback', () => {
+    it('anyone can call a specified callback', async () => {
+      const callbackTarget = await CallbackExample.new();
+      const pollCreationParams = await prepearePollCreationParams(
+        {
+          pollTypeAddress: FirstPastThePostPollType.address,
+          voters: [{ addr: accounts[1], allowedVotes: 1 }],
+          allowVoteDelegation: false,
+          callbackContractAddress: callbackTarget.address,
+          quorum: 0,
+        },
+        accounts
+      );
+      const pollCreationTransaction = await pollFactory.createPoll(...pollCreationParams);
+      const createdPoll = await VotrPollContract.at(pollCreationTransaction.logs[0].args.pollAddress);
+      await time.increase(35 * 60);
+      await createdPoll.callback({ from: accounts[8] });
+      expect((await callbackTarget.winnerIndex()).toNumber()).to.be.equal(0);
+      expect(await callbackTarget.pollAddress()).to.be.equal(createdPoll.address);
+      expect(await callbackTarget.pollTypeAddress()).to.be.equal(FirstPastThePostPollType.address);
+    });
+    it('callback can be called only once', async () => {
+      const callbackTarget = await CallbackExample.new();
+      const pollCreationParams = await prepearePollCreationParams(
+        {
+          pollTypeAddress: FirstPastThePostPollType.address,
+          voters: [{ addr: accounts[1], allowedVotes: 1 }],
+          allowVoteDelegation: false,
+          callbackContractAddress: callbackTarget.address,
+          quorum: 0,
+        },
+        accounts
+      );
+      const pollCreationTransaction = await pollFactory.createPoll(...pollCreationParams);
+      const createdPoll = await VotrPollContract.at(pollCreationTransaction.logs[0].args.pollAddress);
+      await time.increase(35 * 60);
+      await createdPoll.callback({ from: accounts[8] });
+      await expectRevert(createdPoll.callback({ from: accounts[5] }), 'Callback can only be called once');
+    });
+    it('correctly pass information about poll as arguments to callback', async () => {
+      const callbackTarget = await CallbackExample.new();
+      const pollCreationParams = await prepearePollCreationParams(
+        {
+          pollTypeAddress: FirstPastThePostPollType.address,
+          allowVoteDelegation: false,
+          callbackContractAddress: callbackTarget.address,
+          quorum: 0,
+        },
+        accounts
+      );
+      const pollCreationTransaction = await pollFactory.createPoll(...pollCreationParams);
+      const createdPoll = await VotrPollContract.at(pollCreationTransaction.logs[0].args.pollAddress);
+      await createdPoll.vote([1], [1], { from: accounts[1] });
+      await createdPoll.vote([1], [1], { from: accounts[2] });
+      await time.increase(35 * 60);
+      await createdPoll.callback({ from: accounts[8] });
+      expect((await callbackTarget.winnerIndex()).toNumber()).to.be.equal(1);
+      expect(await callbackTarget.pollAddress()).to.be.equal(createdPoll.address);
+      expect(await callbackTarget.pollTypeAddress()).to.be.equal(FirstPastThePostPollType.address);
+    });
+    it('callback cannot be called before poll ends or when quorum is not reached', async () => {
+      const callbackTarget = await CallbackExample.new();
+      const pollCreationParams = await prepearePollCreationParams(
+        {
+          pollTypeAddress: FirstPastThePostPollType.address,
+          callbackContractAddress: callbackTarget.address,
+          quorum: 2,
+        },
+        accounts
+      );
+      const pollCreationTransaction = await pollFactory.createPoll(...pollCreationParams);
+      const createdPoll = await VotrPollContract.at(pollCreationTransaction.logs[0].args.pollAddress);
+      await expectRevert(createdPoll.callback({ from: accounts[0] }), 'Cannot execute callback until poll is finished');
+      await time.increase(35 * 60);
+      await expectRevert(
+        createdPoll.callback({ from: accounts[0] }),
+        'Cannot execute callback because quorum was not reached'
+      );
     });
   });
 });

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 import '@openzeppelin/contracts/token/ERC20/extensions/ERC20Wrapper.sol';
-import '../poll/VotrPoll.sol';
+import '../interfaces/IVotrPoll.sol';
 
 abstract contract ERC20Locker is ERC20Wrapper {
   struct Deposit {
@@ -39,7 +39,7 @@ abstract contract ERC20Locker is ERC20Wrapper {
   }
 
   function unlockAll() public {
-    (bool isFinished, ) = VotrPoll(votrPollContract).isFinished();
+    (bool isFinished, ) = IVotrPoll(votrPollContract).isFinished();
     require(isFinished == true, 'Cannot withdraw funds until poll is finished');
     for (uint256 i = 0; i < userDeposits[msg.sender].length; i++) {
       Deposit memory deposit = userDeposits[msg.sender][i];

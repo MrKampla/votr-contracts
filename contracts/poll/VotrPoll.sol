@@ -2,6 +2,7 @@
 pragma solidity ^0.8.0;
 import '../interfaces/IVotrPollFactory.sol';
 import '../interfaces/IPollType.sol';
+import '../interfaces/ICallback.sol';
 import './ERC20Locker.sol';
 import '@openzeppelin/contracts/token/ERC20/presets/ERC20PresetMinterPauser.sol';
 
@@ -15,6 +16,8 @@ contract VotrPoll is ERC20PresetMinterPauser, ERC20Locker {
   bool public allowVoteDelegation;
   uint256 public quorum;
   uint256 public endDate;
+  address public callbackAddress;
+  bool public isCallbackCalled;
 
   constructor(
     address _chairman,
@@ -39,6 +42,7 @@ contract VotrPoll is ERC20PresetMinterPauser, ERC20Locker {
     quorum = _pollSettings.quorum;
     endDate = _pollSettings.endDate;
     allowVoteDelegation = _pollSettings.allowVoteDelegation;
+    callbackAddress = _pollSettings.callbackContractAddress;
     if (_tokenSettings.basedOnToken == address(0)) {
       for (uint256 i = 0; i < _voters.length; i++) {
         voters.push(_voters[i].addr);
@@ -89,5 +93,14 @@ contract VotrPoll is ERC20PresetMinterPauser, ERC20Locker {
     uint256 amount
   ) internal virtual override(ERC20PresetMinterPauser, ERC20) {
     super._beforeTokenTransfer(from, to, amount);
+  }
+
+  function callback() public {
+    (bool finished, bool quorumReached) = isFinished();
+    require(finished == true, 'Cannot execute callback until poll is finished');
+    require(quorumReached == true, 'Cannot execute callback because quorum was not reached');
+    require(isCallbackCalled == false, 'Callback can only be called once');
+    isCallbackCalled = true;
+    ICallback(callbackAddress).callback(checkWinner(), address(this), pollType);
   }
 }

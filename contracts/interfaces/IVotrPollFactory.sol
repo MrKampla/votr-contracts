@@ -17,6 +17,7 @@ interface IVotrPollFactory {
     uint256 quorum;
     uint256 endDate;
     bool allowVoteDelegation;
+    address callbackContractAddress;
   }
   struct Voter {
     address addr;
