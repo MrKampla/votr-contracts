@@ -60,10 +60,7 @@ contract('ERC20Locker', (accounts) => {
       const createdPoll = await VotrPollContract.at(pollCreationTransaction.logs[0].args.pollAddress);
       await testTokenContract.approve(createdPoll.address, ONE_TOKEN, { from: accounts[0] });
       await createdPoll.lock(ONE_TOKEN, (await getCurrentTimeInSeconds()) + ONE_YEAR_IN_SECONDS, { from: accounts[0] });
-      const amountOfTokensReceivedForYearLockupPeriod = '1666224584848000000';
-      expect((await createdPoll.balanceOf(accounts[0])).toString()).to.be.equal(
-        amountOfTokensReceivedForYearLockupPeriod
-      );
+      expect((await createdPoll.balanceOf(accounts[0])).toString().startsWith('16662245')).to.be.equal(true);
       expect((await testTokenContract.balanceOf(accounts[0])).toNumber()).to.be.equal(0);
     });
     it('should be exchangeable for underlying token', async () => {

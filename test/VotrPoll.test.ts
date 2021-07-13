@@ -1,21 +1,28 @@
 import { expect } from 'chai';
-import { FirstPastThePostPollTypeInstance, VotrPollFactoryInstance } from 'types/truffle-contracts';
+import {
+  CumulativePollTypeInstance,
+  FirstPastThePostPollTypeInstance,
+  VotrPollFactoryInstance,
+} from 'types/truffle-contracts';
 import { expectRevert, time } from '@openzeppelin/test-helpers';
 import { prepearePollCreationParams } from './pollTestHelpers';
 
 const VotrPollContract = artifacts.require('VotrPoll');
 const VotrPollFactoryContract = artifacts.require('VotrPollFactory');
 const FirstPastThePostPollTypeContract = artifacts.require('FirstPastThePostPollType');
+const CumulativePollTypeContract = artifacts.require('CumulativePollType');
 const CallbackExample = artifacts.require('CallbackExample');
 
 let pollFactory: VotrPollFactoryInstance;
 let FirstPastThePostPollType: FirstPastThePostPollTypeInstance;
+let CumulativePollType: CumulativePollTypeInstance;
 type PollCreationParams = Parameters<typeof pollFactory.createPoll>;
 
 contract('VotrPoll', (accounts) => {
   beforeEach(async () => {
     pollFactory = await VotrPollFactoryContract.new();
     FirstPastThePostPollType = await FirstPastThePostPollTypeContract.new();
+    CumulativePollType = await CumulativePollTypeContract.new();
   });
   describe('initialization', () => {
     it('Each voter get specified amount of votes', async () => {
@@ -69,18 +76,17 @@ contract('VotrPoll', (accounts) => {
     it('multiple votes work properly', async () => {
       const pollCreationParams: PollCreationParams = await prepearePollCreationParams(
         {
-          pollTypeAddress: FirstPastThePostPollType.address,
+          pollTypeAddress: CumulativePollType.address,
         },
         accounts
       );
       const pollCreationTransaction = await pollFactory.createPoll(...pollCreationParams);
       const createdPoll = await VotrPollContract.at(pollCreationTransaction.logs[0].args.pollAddress);
 
-      const pollType = await FirstPastThePostPollTypeContract.at(FirstPastThePostPollType.address);
+      const pollType = await CumulativePollTypeContract.at(CumulativePollType.address);
       await createdPoll.vote([0], [1], { from: accounts[1] });
       expect((await pollType.choiceIdToVoteCount(createdPoll.address, 0)).toNumber()).to.be.equal(1);
-      await createdPoll.vote([0], [1], { from: accounts[2] });
-      await createdPoll.vote([1], [1], { from: accounts[2] });
+      await createdPoll.vote([0, 1], [1, 1], { from: accounts[2] });
 
       expect((await pollType.choiceIdToVoteCount(createdPoll.address, 0)).toNumber()).to.be.equal(2);
       expect((await pollType.choiceIdToVoteCount(createdPoll.address, 1)).toNumber()).to.be.equal(1);
@@ -101,7 +107,7 @@ contract('VotrPoll', (accounts) => {
     it('forbids to cast more votes than user is allowed to', async () => {
       const pollCreationParams: PollCreationParams = await prepearePollCreationParams(
         {
-          pollTypeAddress: FirstPastThePostPollType.address,
+          pollTypeAddress: CumulativePollType.address,
         },
         accounts
       );
@@ -113,7 +119,7 @@ contract('VotrPoll', (accounts) => {
     it('forbids to cast a vote if user has no votes to spend', async () => {
       const pollCreationParams: PollCreationParams = await prepearePollCreationParams(
         {
-          pollTypeAddress: FirstPastThePostPollType.address,
+          pollTypeAddress: CumulativePollType.address,
         },
         accounts
       );
