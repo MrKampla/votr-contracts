@@ -16,6 +16,8 @@ interface IPollType {
 
   function checkWinner(uint256 _amountOfChoices) external view returns (uint256 winnerIndex);
 
+  function getAmountOfVotesForChoice(uint256 choiceId) external view returns (int256 voteCount);
+
   function isFinished(uint256 _quorum, uint256 _endDate) external view returns (bool finished, bool quorumReached);
 
   function delegateVote(

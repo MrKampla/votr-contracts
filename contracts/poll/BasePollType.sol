@@ -50,6 +50,10 @@ abstract contract BasePollType is IPollType {
     return winnerIndex;
   }
 
+  function getAmountOfVotesForChoice(uint256 choiceId) public view override returns (int256 voteCount) {
+    return choiceIdToVoteCount[msg.sender][choiceId];
+  }
+
   function isFinished(uint256 _quorum, uint256 _endDate)
     public
     view
