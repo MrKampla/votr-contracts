@@ -133,6 +133,27 @@ contract('VotrPoll', (accounts) => {
     it('returns poll type name', async () => {
       expect(await FirstPastThePostPollType.getPollTypeName()).to.be.equal('First Past The Post');
     });
+    it('returns vote counts for all choices', async () => {
+      const pollCreationParams: PollCreationParams = await prepearePollCreationParams(
+        {
+          pollTypeAddress: CumulativePollType.address,
+          voters: [
+            { addr: accounts[1], allowedVotes: 1 },
+            { addr: accounts[2], allowedVotes: 2 },
+            { addr: accounts[3], allowedVotes: 3 },
+          ],
+        },
+        accounts
+      );
+      const pollCreationTransaction = await pollFactory.createPoll(...pollCreationParams);
+      const createdPoll = await VotrPollContract.at(pollCreationTransaction.logs[0].args.pollAddress);
+      await createdPoll.vote([0], [1], { from: accounts[1] });
+      await createdPoll.vote([0, 1], [1, 1], { from: accounts[2] });
+      await createdPoll.vote([1], [3], { from: accounts[3] });
+      const results = await createdPoll.getAmountOfVotesForChoices();
+      expect(results[0].toNumber()).to.be.equal(2);
+      expect(results[1].toNumber()).to.be.equal(4);
+    });
     it('vote delagation works properly', async () => {
       const pollCreationParams = await prepearePollCreationParams(
         {

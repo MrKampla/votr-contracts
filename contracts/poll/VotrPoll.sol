@@ -68,8 +68,12 @@ contract VotrPoll is ERC20PresetMinterPauser, ERC20Locker {
     return IPollType(pollType).checkWinner(choices.length);
   }
 
-  function getAmountOfVotesForChoice(uint256 choiceId) public view returns (int256 voteCount) {
-    return IPollType(pollType).getAmountOfVotesForChoice(choiceId);
+  function getAmountOfVotesForChoices() public view returns (int256[] memory) {
+    int256[] memory results = new int256[](choices.length);
+    for (uint256 i = 0; i < choices.length; i++) {
+      results[i] = IPollType(pollType).getAmountOfVotesForChoice(i);
+    }
+    return results;
   }
 
   function isFinished() public view returns (bool finished, bool quorumReached) {
