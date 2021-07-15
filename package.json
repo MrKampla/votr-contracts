@@ -12,7 +12,7 @@
     "prettier": "prettier --write 'contracts/**/*.sol'",
     "postinstall": "yarn typegen",
     "typegen": "rm -rf types && truffle compile && typechain --target=truffle-v5 './build/contracts/*.json'",
-    "ganache": "ganache-cli -m \"problem used theory volcano daring enough much spray sail steak finish loop\" --networkId 4447",
+    "ganache": "ganache-cli -m \"problem used theory volcano daring enough much spray sail steak finish loop\" --networkId 1337",
     "deploy": "truffle migrate",
     "lint": "solhint 'contracts/**/*.sol'"
   },
