@@ -48,6 +48,25 @@ contract('FirstPastThePostPollType', (accounts) => {
     const createdPoll = await VotrPollContract.at(pollCreationTransaction.logs[0].args.pollAddress);
     await expectRevert(createdPoll.vote([0, 1], [1, 1], { from: accounts[2] }), 'You can only vote for one choice');
   });
+  it('correctly counts amount of voters when there are multiple polls using it', async () => {
+    const pollCreationParams: PollCreationParams = await prepearePollCreationParams(
+      {
+        pollTypeAddress: FirstPastThePostPollType.address,
+      },
+      accounts
+    );
+    for await (const i of [0, 1]) {
+      const pollCreationTransaction = await pollFactory.createPoll(...pollCreationParams);
+      const createdPoll = await VotrPollContract.at(pollCreationTransaction.logs[0].args.pollAddress);
+      expect(
+        (await FirstPastThePostPollType.amountOfVotersWhoAlreadyVoted(createdPoll.address)).toNumber()
+      ).to.be.equal(0);
+      await createdPoll.vote([0], [1], { from: accounts[2] });
+      expect(
+        (await FirstPastThePostPollType.amountOfVotersWhoAlreadyVoted(createdPoll.address)).toNumber()
+      ).to.be.equal(1);
+    }
+  });
 });
 contract('EvaluativePollType', (accounts) => {
   beforeEach(async () => {

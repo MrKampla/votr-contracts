@@ -8,7 +8,7 @@ import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 abstract contract BasePollType is IPollType {
   mapping(address => mapping(uint256 => int256)) public choiceIdToVoteCount;
   mapping(address => mapping(address => bool)) public hasVoted;
-  uint256 public amountOfVotersWhoAlreadyVoted;
+  mapping(address => uint256) public amountOfVotersWhoAlreadyVoted;
 
   function onInit(address poll, address owner) public pure override {} // solhint-disable-line
 
@@ -23,7 +23,7 @@ abstract contract BasePollType is IPollType {
       int256 _amountOfVotesCastForChoice = amountOfVotes[i];
       choiceIdToVoteCount[votrPollAddress][_choices[i]] += _amountOfVotesCastForChoice;
       if (!hasVoted[votrPollAddress][voter]) {
-        amountOfVotersWhoAlreadyVoted++;
+        amountOfVotersWhoAlreadyVoted[votrPollAddress]++;
       }
       hasVoted[votrPollAddress][voter] = true;
       _amountOfAllVotesCasted += abs(_amountOfVotesCastForChoice);
@@ -63,7 +63,7 @@ abstract contract BasePollType is IPollType {
     if (_endDate < block.timestamp) {
       finished = true;
     }
-    if (amountOfVotersWhoAlreadyVoted >= _quorum) {
+    if (amountOfVotersWhoAlreadyVoted[msg.sender] >= _quorum) {
       quorumReached = true;
     }
   }

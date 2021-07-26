@@ -18,7 +18,7 @@ contract QuadraticPollType is BasePollType {
       int256 _amountOfVotesCastForChoice = amountOfVotes[i];
       choiceIdToVoteCount[votrPollAddress][_choices[i]] += _amountOfVotesCastForChoice;
       if (!hasVoted[votrPollAddress][voter]) {
-        amountOfVotersWhoAlreadyVoted++;
+        amountOfVotersWhoAlreadyVoted[votrPollAddress]++;
       }
       hasVoted[votrPollAddress][voter] = true;
       _amountOfAllVotesCasted += abs(_amountOfVotesCastForChoice)**2;
