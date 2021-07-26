@@ -128,6 +128,18 @@ contract('VotrPoll', (accounts) => {
       await createdPoll.vote([0], [1], { from: accounts[1] });
       await expectRevert(createdPoll.vote([0], [1], { from: accounts[1] }), 'Not enough allowance');
     });
+    it('forbids to cast a vote if poll has finished', async () => {
+      const pollCreationParams: PollCreationParams = await prepearePollCreationParams(
+        {
+          pollTypeAddress: CumulativePollType.address,
+        },
+        accounts
+      );
+      const pollCreationTransaction = await pollFactory.createPoll(...pollCreationParams);
+      const createdPoll = await VotrPollContract.at(pollCreationTransaction.logs[0].args.pollAddress);
+      await time.increase(45 * 60); // 45 minutes later, poll is finished by now
+      await expectRevert(createdPoll.vote([0], [1], { from: accounts[1] }), 'Poll already ended');
+    });
   });
   describe('peripheral functionalities', () => {
     it('returns poll type name', async () => {

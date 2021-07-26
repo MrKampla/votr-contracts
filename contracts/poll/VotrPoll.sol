@@ -54,6 +54,8 @@ contract VotrPoll is ERC20PresetMinterPauser, ERC20Locker {
   }
 
   function vote(uint256[] memory _choices, int256[] memory amountOfVotes) public returns (bool) {
+    (bool finished, ) = isFinished();
+    require(finished == false, 'Poll already ended');
     IPollType(pollType).vote(msg.sender, _choices, amountOfVotes);
     IVotrPollFactory(_votrFactory).emitVotedEvent(msg.sender, _choices, amountOfVotes);
     return true;
