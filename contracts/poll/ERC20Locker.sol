@@ -8,6 +8,14 @@ abstract contract ERC20Locker is ERC20Wrapper {
   uint32 internal constant INCREASE_OF_VOTING_POWER_PER_SECOND = 105629215; // / 10**16;
   uint8 internal constant MAX_BONUS_MULTIPLIER = 2;
 
+  event Deposited(
+    address indexed depositor,
+    uint256 indexed id,
+    uint256 amountDeposited,
+    uint256 startDate,
+    uint256 endDate
+  );
+
   struct Deposit {
     uint256 id;
     uint256 amountDeposited;
@@ -37,6 +45,7 @@ abstract contract ERC20Locker is ERC20Wrapper {
       startDate: block.timestamp,
       endDate: endDate
     });
+    emit Deposited(msg.sender, deposit.id, deposit.amountDeposited, deposit.startDate, endDate);
     uint256 bonus = _calculateBonusForLockupPeriod(deposit);
     require(endDate > block.timestamp || endDate == 0, 'Lockup period cannot end in past');
     if (endDate != 0) {

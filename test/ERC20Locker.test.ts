@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import { FirstPastThePostPollTypeInstance, VotrPollFactoryInstance } from 'types/truffle-contracts';
-import { expectRevert, time } from '@openzeppelin/test-helpers';
+import { expectRevert, time, expectEvent } from '@openzeppelin/test-helpers';
 import { getCurrentTimeInSeconds, prepearePollCreationParams } from './pollTestHelpers';
 
 const VotrPollContract = artifacts.require('VotrPoll');
@@ -155,6 +155,30 @@ contract('ERC20Locker', (accounts) => {
 
       await time.increase(ONE_YEAR_IN_SECONDS + 60 * 60);
       await createdPoll.unlockAll({ from: accounts[0] });
+    });
+    it('should emit Deposited event when locking funds', async () => {
+      const testTokenContract = await ERC20Contract.new('TEST TOKEN', 'TST');
+
+      await testTokenContract.mint(accounts[0], ONE_TOKEN);
+      const pollCreationParams: PollCreationParams = await prepearePollCreationParams(
+        {
+          pollTypeAddress: FirstPastThePostPollType.address,
+          token: {
+            basedOnToken: testTokenContract.address,
+          },
+        },
+        accounts
+      );
+      const pollCreationTransaction = await pollFactory.createPoll(...pollCreationParams);
+      const createdPoll = await VotrPollContract.at(pollCreationTransaction.logs[0].args.pollAddress);
+      await testTokenContract.approve(createdPoll.address, ONE_TOKEN, { from: accounts[0] });
+      await expectEvent(await createdPoll.lock(ONE_TOKEN, 0, { from: accounts[0] }), 'Deposited');
+
+      const depositEvent = (await createdPoll.getPastEvents('Deposited'))[0];
+      expect(depositEvent.returnValues.depositor).to.be.equal(accounts[0]);
+      expect(depositEvent.returnValues.id).to.be.equal('0');
+      expect(depositEvent.returnValues.amountDeposited).to.be.equal(ONE_TOKEN.toString());
+      expect(depositEvent.returnValues.endDate).to.be.equal('0');
     });
   });
 });
