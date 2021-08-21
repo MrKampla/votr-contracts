@@ -8,22 +8,15 @@ abstract contract ERC20Locker is ERC20Wrapper {
   uint32 internal constant INCREASE_OF_VOTING_POWER_PER_SECOND = 105629215; // / 10**16;
   uint8 internal constant MAX_BONUS_MULTIPLIER = 2;
 
-  event Deposited(
-    address indexed depositor,
-    uint256 indexed id,
-    uint256 amountDeposited,
-    uint256 startDate,
-    uint256 endDate
-  );
+  event Deposited(address indexed depositor, uint256 amountDeposited, uint256 startDate, uint256 endDate);
 
   struct Deposit {
-    uint256 id;
     uint256 amountDeposited;
     uint256 startDate;
     uint256 endDate;
   }
-  mapping(address => Deposit[]) public userDeposits;
-  mapping(address => uint256) public userNextDepositId;
+  mapping(address => Deposit) public userDeposits;
+  mapping(address => bool) public hasLocked;
   address public pollType;
   address public votrPollContract;
 
@@ -38,21 +31,22 @@ abstract contract ERC20Locker is ERC20Wrapper {
 
   function lock(uint256 amount, uint256 endDate) public returns (uint256 depositId) {
     require(amount > 0, 'Cannot lock 0 tokens');
+    require(hasLocked[msg.sender] == false, 'Already deposited funds');
+
     depositFor(msg.sender, amount);
-    Deposit memory deposit = Deposit({
-      id: userNextDepositId[msg.sender],
-      amountDeposited: amount,
-      startDate: block.timestamp,
-      endDate: endDate
-    });
-    emit Deposited(msg.sender, deposit.id, deposit.amountDeposited, deposit.startDate, endDate);
+    hasLocked[msg.sender] = true;
+    Deposit memory deposit = Deposit({ amountDeposited: amount, startDate: block.timestamp, endDate: endDate });
+
+    emit Deposited(msg.sender, deposit.amountDeposited, deposit.startDate, endDate);
     uint256 bonus = _calculateBonusForLockupPeriod(deposit);
+
     require(endDate > block.timestamp || endDate == 0, 'Lockup period cannot end in past');
+
     if (endDate != 0) {
       _mint(msg.sender, _calculateBonusForLockupPeriod(deposit));
     }
-    userNextDepositId[msg.sender]++;
-    userDeposits[msg.sender].push(deposit);
+
+    userDeposits[msg.sender] = deposit;
     _approve(msg.sender, pollType, amount + bonus);
     return depositId;
   }
@@ -68,33 +62,19 @@ abstract contract ERC20Locker is ERC20Wrapper {
     return (deposit.amountDeposited * multiplier) / 10**16;
   }
 
-  function unlockAll() public {
-    for (uint256 i = 0; i < userDeposits[msg.sender].length; i++) {
-      Deposit memory deposit = userDeposits[msg.sender][i];
-      _unlock(deposit.id);
-    }
-  }
-
-  function _unlock(uint256 depositId) internal {
-    Deposit memory deposit = userDeposits[msg.sender][depositId];
+  function unlock() public {
+    Deposit memory deposit = userDeposits[msg.sender];
+    require(deposit.amountDeposited != 0, 'There is no deposit');
     require(deposit.endDate < block.timestamp, 'Locking period not finished');
+
     uint256 amountOfTokensToBurn = min(balanceOf(msg.sender), deposit.amountDeposited);
     _burn(msg.sender, amountOfTokensToBurn);
     IERC20(underlying).transfer(msg.sender, deposit.amountDeposited);
     unchecked {
       _approve(msg.sender, pollType, allowance(msg.sender, pollType) - deposit.amountDeposited);
     }
-    removeWithoutAGap(depositId);
-  }
 
-  function removeWithoutAGap(uint256 index) internal {
-    if (index >= userDeposits[msg.sender].length) return;
-
-    for (uint256 i = index; i < userDeposits[msg.sender].length - 1; i++) {
-      userDeposits[msg.sender][i] = userDeposits[msg.sender][i + 1];
-    }
-    delete userDeposits[msg.sender][userDeposits[msg.sender].length - 1];
-    userDeposits[msg.sender].pop();
+    delete userDeposits[msg.sender];
   }
 
   function min(uint256 x, uint256 y) internal pure returns (uint256 z) {

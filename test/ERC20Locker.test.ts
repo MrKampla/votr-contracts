@@ -83,7 +83,7 @@ contract('ERC20Locker', (accounts) => {
       expect((await createdPoll.balanceOf(accounts[0])).toNumber()).to.be.equal(1);
       expect((await testTokenContract.balanceOf(accounts[0])).toNumber()).to.be.equal(0);
       await time.increase(35 * 60); // 35 minutes
-      await createdPoll.unlockAll({ from: accounts[0] });
+      await createdPoll.unlock({ from: accounts[0] });
       expect((await createdPoll.balanceOf(accounts[0])).toNumber()).to.be.equal(0);
       expect((await testTokenContract.balanceOf(accounts[0])).toNumber()).to.be.equal(1);
     });
@@ -113,7 +113,7 @@ contract('ERC20Locker', (accounts) => {
 
       await time.increase(35 * 60); // 35 minutes
 
-      await createdPoll.unlockAll({ from: accounts[0] });
+      await createdPoll.unlock({ from: accounts[0] });
       expect((await createdPoll.balanceOf(accounts[0])).toNumber()).to.be.equal(0);
       expect((await testTokenContract.balanceOf(accounts[0])).toNumber()).to.be.equal(1);
     });
@@ -151,10 +151,10 @@ contract('ERC20Locker', (accounts) => {
       await testTokenContract.approve(createdPoll.address, ONE_TOKEN, { from: accounts[0] });
       const currentTime = await getCurrentTimeInSeconds();
       await createdPoll.lock(ONE_TOKEN, currentTime + ONE_YEAR_IN_SECONDS, { from: accounts[0] });
-      await expectRevert(createdPoll.unlockAll({ from: accounts[0] }), 'Locking period not finished');
+      await expectRevert(createdPoll.unlock({ from: accounts[0] }), 'Locking period not finished');
 
       await time.increase(ONE_YEAR_IN_SECONDS + 60 * 60);
-      await createdPoll.unlockAll({ from: accounts[0] });
+      await createdPoll.unlock({ from: accounts[0] });
     });
     it('should emit Deposited event when locking funds', async () => {
       const testTokenContract = await ERC20Contract.new('TEST TOKEN', 'TST');
@@ -176,7 +176,6 @@ contract('ERC20Locker', (accounts) => {
 
       const depositEvent = (await createdPoll.getPastEvents('Deposited'))[0];
       expect(depositEvent.returnValues.depositor).to.be.equal(accounts[0]);
-      expect(depositEvent.returnValues.id).to.be.equal('0');
       expect(depositEvent.returnValues.amountDeposited).to.be.equal(ONE_TOKEN.toString());
       expect(depositEvent.returnValues.endDate).to.be.equal('0');
     });
