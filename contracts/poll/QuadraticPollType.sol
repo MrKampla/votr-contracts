@@ -12,6 +12,7 @@ contract QuadraticPollType is BasePollType {
     uint256[] memory _choices,
     int256[] memory amountOfVotes
   ) public override returns (bool) {
+    require(hasVoted[msg.sender][voter] == false, 'You can only vote once');
     address votrPollAddress = msg.sender;
     int256 _amountOfAllVotesCasted = 0;
     for (uint256 i = 0; i < amountOfVotes.length; i++) {

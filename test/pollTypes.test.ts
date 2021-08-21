@@ -111,9 +111,19 @@ contract('QuadraticPollType', (accounts) => {
     );
     const pollCreationTransaction = await pollFactory.createPoll(...pollCreationParams);
     const createdPoll = await VotrPollContract.at(pollCreationTransaction.logs[0].args.pollAddress);
-    await createdPoll.vote([0], [10], { from: accounts[1] });
-    expect((await QuadraticPollType.choiceIdToVoteCount(createdPoll.address, 0)).toNumber()).to.be.equal(10);
-    expect((await createdPoll.balanceOf(accounts[1])).toNumber()).to.be.equal(0);
     await expectRevert(createdPoll.vote([0], [11], { from: accounts[1] }), 'Not enough allowance');
+  });
+  it('prevents from voting twice', async () => {
+    const pollCreationParams: PollCreationParams = await prepearePollCreationParams(
+      {
+        pollTypeAddress: QuadraticPollType.address,
+        voters: [{ addr: accounts[2], allowedVotes: 100 }],
+      },
+      accounts
+    );
+    const pollCreationTransaction = await pollFactory.createPoll(...pollCreationParams);
+    const createdPoll = await VotrPollContract.at(pollCreationTransaction.logs[0].args.pollAddress);
+    await createdPoll.vote([0], [1], { from: accounts[2] });
+    await expectRevert(createdPoll.vote([0], [1], { from: accounts[2] }), 'You can only vote once');
   });
 });
