@@ -1,9 +1,17 @@
 {
   "name": "@votr/contracts",
   "version": "1.0.0",
-  "description": "Votr contracts",
+  "description": "Contracts for the Votr protocol",
   "directories": {
     "test": "test"
+  },
+  "files": [
+    "contracts",
+    "build"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MrKampla/votr-contracts"
   },
   "scripts": {
     "test": "truffle test",
@@ -14,7 +22,8 @@
     "typegen": "rm -rf types && truffle compile && typechain --target=truffle-v5 './build/contracts/*.json'",
     "ganache": "ganache-cli -m \"problem used theory volcano daring enough much spray sail steak finish loop\" --networkId 1337",
     "deploy": "truffle migrate",
-    "lint": "solhint 'contracts/**/*.sol'"
+    "lint": "solhint 'contracts/**/*.sol'",
+    "prepublishOnly": "yarn deploy && yarn test"
   },
   "author": "Kamil Planer <mrkampla@gmail.com>",
   "license": "MIT",
