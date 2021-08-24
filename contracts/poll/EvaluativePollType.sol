@@ -15,6 +15,7 @@ contract EvaluativePollType is BasePollType {
     for (uint256 i = 0; i < amountOfVotes.length; i++) {
       int256 amount = amountOfVotes[i];
       require(amount == 1 || amount == -1, 'You can only vote for or against this choice (1,-1)');
+      require(hasVoted[msg.sender][voter] == false, 'You can only vote once');
     }
     return super.vote(voter, _choices, amountOfVotes);
   }
