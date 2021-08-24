@@ -1,6 +1,6 @@
 {
   "name": "@votr/contracts",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Contracts for the Votr protocol",
   "directories": {
     "test": "test"
@@ -18,7 +18,6 @@
     "test:watch": "nodemon --watch ./test --ext 'ts' --exec 'truffle test'",
     "truffle:version": "truffle version",
     "prettier": "prettier --write 'contracts/**/*.sol'",
-    "postinstall": "yarn typegen",
     "typegen": "rm -rf types && truffle compile && typechain --target=truffle-v5 './build/contracts/*.json'",
     "ganache": "ganache-cli -m \"problem used theory volcano daring enough much spray sail steak finish loop\" --networkId 1337",
     "deploy": "truffle migrate",
