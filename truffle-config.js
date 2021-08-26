@@ -2,6 +2,11 @@ require('ts-node').register({
   files: true,
 });
 
+const HDWalletProvider = require('@truffle/hdwallet-provider');
+
+const privateKey = require('./secrets.json').privateKey;
+const nodeProviderURL = require('./secrets.json').nodeProviderURL;
+
 module.exports = {
   // See <http://truffleframework.com/docs/advanced/configuration>
   // for more about customizing your Truffle configuration!
@@ -14,8 +19,14 @@ module.exports = {
       network_id: '*', // Match any network id
       gas: 6721975,
     },
-    develop: {
-      port: 8545,
+    ropsten: {
+      provider: () => new HDWalletProvider(privateKey, nodeProviderURL),
+      network_id: 3,
+      gas: 5500000,
+      confirmations: 1,
+      timeoutBlocks: 2000,
+      skipDryRun: true,
+      networkCheckTimeout: 1000000,
     },
   },
   mocha: {
