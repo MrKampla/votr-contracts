@@ -2,6 +2,15 @@
 
 This is a repo containing all contracts of which Votr protocol consists. They were created with use of Truffle framework and Solidity 0.8.0.
 
+## What is Votr?
+
+Votr is a decentralized voting application that solves two biggest problems of centralized E-voting solutions:
+- susceptibility to manipulation - current E-voting systems are susceptible to modification by the institutions organizing the elections. There is a possibility that the government will tamper with the voting results for its own benefit, since as a single organizer it has full control over the counting system. Additionally, because the system is centralized, there is a likelihood of a hack that could bring the entire system to a halt or worse, a third party modifying the results.
+- Lack of transparency - for the user of the system there is no way to verify whether the cast vote arrived unchanged and whether it was counted correctly. The voter is forced to trust the centralized service, which may present incorrect information.
+The solution to these problems is to decentralize the process by storing the data on a public blockchain. A public blockchain containing transactions open for inspection guarantees transparency, as any person with an internet connection will be able to verify the correctness of casted votes. 
+
+Votr uses smart contracts deployed to the Ethereum network as a backend which grants full transparency and trustlessness. With this solution, no single authority or institution will have the ability to manipulate the results, as all the data will be publicly available. By placing the application logic in a distributed network of computers, the single point of failure problem is automatically solved too.
+
 ## Development
 
 Local development environment is dependent on local blockchain provided by Ganache. To start it, use
